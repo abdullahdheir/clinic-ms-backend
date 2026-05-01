@@ -64,6 +64,11 @@ class User extends Authenticatable
         return $this->hasMany(MedicalFile::class, 'patient_id');
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';

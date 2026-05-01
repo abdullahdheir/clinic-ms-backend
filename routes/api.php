@@ -8,6 +8,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorShiftController;
 use App\Http\Controllers\MedicalFileController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\VisitController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('medical-records', MedicalRecordController::class);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
+    Route::apiResource('notifications', NotificationController::class);
 });
