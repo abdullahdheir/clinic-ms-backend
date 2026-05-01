@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDoctorShiftRequest;
 use App\Http\Requests\UpdateDoctorShiftRequest;
-use App\Models\DoctorShift;
+use App\Repositories\DoctorShiftRepository;
 use App\Traits\ApiResponse;
 
 class DoctorShiftController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private DoctorShiftRepository $repository
+    ) {}
 
     /**
      * Get all doctor shifts with doctor details
@@ -18,7 +22,7 @@ class DoctorShiftController extends Controller
      */
     public function index()
     {
-        $shifts = DoctorShift::with('doctor.user')->get();
+        $shifts = $this->repository->allWithRelations();
         return $this->successResponse($shifts);
     }
 
@@ -30,7 +34,7 @@ class DoctorShiftController extends Controller
      */
     public function store(StoreDoctorShiftRequest $request)
     {
-        $shift = DoctorShift::create($request->only([
+        $shift = $this->repository->create($request->only([
             'doctor_id',
             'day_of_week',
             'start_time',
@@ -48,7 +52,7 @@ class DoctorShiftController extends Controller
      */
     public function show(string $id)
     {
-        $shift = DoctorShift::with('doctor.user')->findOrFail($id);
+        $shift = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($shift);
     }
 
@@ -61,8 +65,7 @@ class DoctorShiftController extends Controller
      */
     public function update(UpdateDoctorShiftRequest $request, string $id)
     {
-        $shift = DoctorShift::findOrFail($id);
-        $shift->update($request->only([
+        $shift = $this->repository->update($id, $request->only([
             'doctor_id',
             'day_of_week',
             'start_time',
@@ -80,8 +83,7 @@ class DoctorShiftController extends Controller
      */
     public function destroy(string $id)
     {
-        $shift = DoctorShift::findOrFail($id);
-        $shift->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Doctor shift deleted successfully');
     }
 }

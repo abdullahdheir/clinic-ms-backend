@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMedicalFileRequest;
 use App\Http\Requests\UpdateMedicalFileRequest;
-use App\Models\MedicalFile;
+use App\Repositories\MedicalFileRepository;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Storage;
 
 class MedicalFileController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private MedicalFileRepository $repository
+    ) {}
 
     /**
      * Get all medical files with patient and visit details
@@ -19,7 +23,7 @@ class MedicalFileController extends Controller
      */
     public function index()
     {
-        $files = MedicalFile::with(['patient', 'visit'])->get();
+        $files = $this->repository->allWithRelations();
         return $this->successResponse($files);
     }
 
@@ -33,7 +37,7 @@ class MedicalFileController extends Controller
     {
         $path = $request->file('file')->store('medical-files', 'public');
         
-        $file = MedicalFile::create([
+        $file = $this->repository->create([
             'patient_id' => $request->patient_id,
             'visit_id' => $request->visit_id,
             'file_name' => $request->file('file')->getClientOriginalName(),
@@ -54,7 +58,7 @@ class MedicalFileController extends Controller
      */
     public function show(string $id)
     {
-        $file = MedicalFile::with(['patient', 'visit'])->findOrFail($id);
+        $file = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($file);
     }
 
@@ -67,8 +71,7 @@ class MedicalFileController extends Controller
      */
     public function update(UpdateMedicalFileRequest $request, string $id)
     {
-        $file = MedicalFile::findOrFail($id);
-        $file->update($request->only('description'));
+        $file = $this->repository->update($id, $request->only('description'));
         return $this->successResponse($file);
     }
 
@@ -80,13 +83,7 @@ class MedicalFileController extends Controller
      */
     public function destroy(string $id)
     {
-        $file = MedicalFile::findOrFail($id);
-        
-        if (Storage::disk('public')->exists($file->file_path)) {
-            Storage::disk('public')->delete($file->file_path);
-        }
-        
-        $file->delete();
+        $this->repository->deleteWithFile($id);
         return $this->successResponse(null, 'Medical file deleted successfully');
     }
 }

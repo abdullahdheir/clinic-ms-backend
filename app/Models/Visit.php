@@ -2,28 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Casts;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable(['patient_id', 'doctor_id', 'appointment_id', 'visit_date', 'chief_complaint', 'diagnosis', 'prescription', 'notes', 'visit_type'])]
+#[Casts(['visit_date' => 'datetime'])]
 class Visit extends Model
 {
-    protected $fillable = [
-        'patient_id',
-        'doctor_id',
-        'appointment_id',
-        'visit_date',
-        'chief_complaint',
-        'diagnosis',
-        'prescription',
-        'notes',
-        'visit_type',
-    ];
-
-    protected $casts = [
-        'visit_date' => 'datetime',
-    ];
-
     public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');

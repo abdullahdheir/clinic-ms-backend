@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVisitRequest;
 use App\Http\Requests\UpdateVisitRequest;
-use App\Models\Visit;
+use App\Repositories\VisitRepository;
 use App\Traits\ApiResponse;
 
 class VisitController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private VisitRepository $repository
+    ) {}
 
     /**
      * Get all visits with patient, doctor, and appointment details
@@ -18,7 +22,7 @@ class VisitController extends Controller
      */
     public function index()
     {
-        $visits = Visit::with(['patient', 'doctor.user', 'appointment'])->get();
+        $visits = $this->repository->allWithRelations();
         return $this->successResponse($visits);
     }
 
@@ -30,7 +34,7 @@ class VisitController extends Controller
      */
     public function store(StoreVisitRequest $request)
     {
-        $visit = Visit::create($request->only([
+        $visit = $this->repository->create($request->only([
             'patient_id',
             'doctor_id',
             'appointment_id',
@@ -52,7 +56,7 @@ class VisitController extends Controller
      */
     public function show(string $id)
     {
-        $visit = Visit::with(['patient', 'doctor.user', 'appointment', 'medicalFiles'])->findOrFail($id);
+        $visit = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($visit);
     }
 
@@ -65,8 +69,7 @@ class VisitController extends Controller
      */
     public function update(UpdateVisitRequest $request, string $id)
     {
-        $visit = Visit::findOrFail($id);
-        $visit->update($request->only([
+        $visit = $this->repository->update($id, $request->only([
             'patient_id',
             'doctor_id',
             'appointment_id',
@@ -88,8 +91,7 @@ class VisitController extends Controller
      */
     public function destroy(string $id)
     {
-        $visit = Visit::findOrFail($id);
-        $visit->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Visit deleted successfully');
     }
 }

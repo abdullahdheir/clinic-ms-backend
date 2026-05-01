@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNotificationRequest;
 use App\Http\Requests\UpdateNotificationRequest;
-use App\Models\Notification;
+use App\Repositories\NotificationRepository;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private NotificationRepository $repository
+    ) {}
 
     /**
      * Get user notifications
@@ -20,9 +24,7 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $notifications = Notification::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $notifications = $this->repository->getByUserId($request->user()->id);
         return $this->successResponse($notifications);
     }
 
@@ -34,7 +36,7 @@ class NotificationController extends Controller
      */
     public function store(StoreNotificationRequest $request)
     {
-        $notification = Notification::create($request->only([
+        $notification = $this->repository->create($request->only([
             'user_id',
             'title',
             'message',
@@ -53,7 +55,7 @@ class NotificationController extends Controller
      */
     public function show(string $id)
     {
-        $notification = Notification::with('user')->findOrFail($id);
+        $notification = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($notification);
     }
 
@@ -66,8 +68,7 @@ class NotificationController extends Controller
      */
     public function update(UpdateNotificationRequest $request, string $id)
     {
-        $notification = Notification::findOrFail($id);
-        $notification->update($request->only('is_read'));
+        $notification = $this->repository->update($id, $request->only('is_read'));
         return $this->successResponse($notification);
     }
 
@@ -79,8 +80,7 @@ class NotificationController extends Controller
      */
     public function destroy(string $id)
     {
-        $notification = Notification::findOrFail($id);
-        $notification->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Notification deleted successfully');
     }
 }

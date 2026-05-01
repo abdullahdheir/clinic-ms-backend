@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMedicalRecordRequest;
 use App\Http\Requests\UpdateMedicalRecordRequest;
-use App\Models\MedicalRecord;
+use App\Repositories\MedicalRecordRepository;
 use App\Traits\ApiResponse;
 
 class MedicalRecordController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private MedicalRecordRepository $repository
+    ) {}
 
     /**
      * Get all medical records with patient and doctor details
@@ -18,7 +22,7 @@ class MedicalRecordController extends Controller
      */
     public function index()
     {
-        $records = MedicalRecord::with(['patient', 'doctor.user'])->get();
+        $records = $this->repository->allWithRelations();
         return $this->successResponse($records);
     }
 
@@ -30,7 +34,7 @@ class MedicalRecordController extends Controller
      */
     public function store(StoreMedicalRecordRequest $request)
     {
-        $record = MedicalRecord::create($request->only([
+        $record = $this->repository->create($request->only([
             'patient_id',
             'doctor_id',
             'allergies',
@@ -50,7 +54,7 @@ class MedicalRecordController extends Controller
      */
     public function show(string $id)
     {
-        $record = MedicalRecord::with(['patient', 'doctor.user'])->findOrFail($id);
+        $record = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($record);
     }
 
@@ -63,8 +67,7 @@ class MedicalRecordController extends Controller
      */
     public function update(UpdateMedicalRecordRequest $request, string $id)
     {
-        $record = MedicalRecord::findOrFail($id);
-        $record->update($request->only([
+        $record = $this->repository->update($id, $request->only([
             'patient_id',
             'doctor_id',
             'allergies',
@@ -84,8 +87,7 @@ class MedicalRecordController extends Controller
      */
     public function destroy(string $id)
     {
-        $record = MedicalRecord::findOrFail($id);
-        $record->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Medical record deleted successfully');
     }
 }

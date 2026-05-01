@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClinicRequest;
 use App\Http\Requests\UpdateClinicRequest;
-use App\Models\Clinic;
+use App\Repositories\ClinicRepository;
 use App\Traits\ApiResponse;
 
 class ClinicController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private ClinicRepository $repository
+    ) {}
 
     /**
      * Get all clinics with manager details
@@ -18,7 +22,7 @@ class ClinicController extends Controller
      */
     public function index()
     {
-        $clinics = Clinic::with('manager')->get();
+        $clinics = $this->repository->allWithRelations();
         return $this->successResponse($clinics);
     }
 
@@ -30,7 +34,7 @@ class ClinicController extends Controller
      */
     public function store(StoreClinicRequest $request)
     {
-        $clinic = Clinic::create($request->only([
+        $clinic = $this->repository->create($request->only([
             'name',
             'address',
             'phone',
@@ -50,7 +54,7 @@ class ClinicController extends Controller
      */
     public function show(string $id)
     {
-        $clinic = Clinic::with(['manager', 'departments'])->findOrFail($id);
+        $clinic = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($clinic);
     }
 
@@ -63,8 +67,7 @@ class ClinicController extends Controller
      */
     public function update(UpdateClinicRequest $request, string $id)
     {
-        $clinic = Clinic::findOrFail($id);
-        $clinic->update($request->only([
+        $clinic = $this->repository->update($id, $request->only([
             'name',
             'address',
             'phone',
@@ -84,8 +87,7 @@ class ClinicController extends Controller
      */
     public function destroy(string $id)
     {
-        $clinic = Clinic::findOrFail($id);
-        $clinic->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Clinic deleted successfully');
     }
 }

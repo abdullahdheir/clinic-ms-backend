@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
-use App\Models\Appointment;
+use App\Repositories\AppointmentRepository;
 use App\Traits\ApiResponse;
 
 class AppointmentController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private AppointmentRepository $repository
+    ) {}
 
     /**
      * Get all appointments with related data
@@ -18,7 +22,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $appointments = Appointment::with(['patient', 'doctor.user', 'department'])->get();
+        $appointments = $this->repository->allWithRelations();
         return $this->successResponse($appointments);
     }
 
@@ -30,7 +34,7 @@ class AppointmentController extends Controller
      */
     public function store(StoreAppointmentRequest $request)
     {
-        $appointment = Appointment::create($request->only([
+        $appointment = $this->repository->create($request->only([
             'patient_id',
             'doctor_id',
             'department_id',
@@ -49,7 +53,7 @@ class AppointmentController extends Controller
      */
     public function show(string $id)
     {
-        $appointment = Appointment::with(['patient', 'doctor.user', 'department', 'checkedInBy'])->findOrFail($id);
+        $appointment = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($appointment);
     }
 
@@ -62,8 +66,7 @@ class AppointmentController extends Controller
      */
     public function update(UpdateAppointmentRequest $request, string $id)
     {
-        $appointment = Appointment::findOrFail($id);
-        $appointment->update($request->only([
+        $appointment = $this->repository->update($id, $request->only([
             'patient_id',
             'doctor_id',
             'department_id',
@@ -85,8 +88,7 @@ class AppointmentController extends Controller
      */
     public function destroy(string $id)
     {
-        $appointment = Appointment::findOrFail($id);
-        $appointment->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Appointment deleted successfully');
     }
 }

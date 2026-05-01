@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
-use App\Models\Department;
+use App\Repositories\DepartmentRepository;
 use App\Traits\ApiResponse;
 
 class DepartmentController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private DepartmentRepository $repository
+    ) {}
 
     /**
      * Get all departments with clinic and doctors
@@ -18,7 +22,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::with(['clinic', 'doctors'])->get();
+        $departments = $this->repository->allWithRelations();
         return $this->successResponse($departments);
     }
 
@@ -30,7 +34,7 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request)
     {
-        $department = Department::create($request->only([
+        $department = $this->repository->create($request->only([
             'clinic_id',
             'name',
             'specialty',
@@ -48,7 +52,7 @@ class DepartmentController extends Controller
      */
     public function show(string $id)
     {
-        $department = Department::with(['clinic', 'doctors.user'])->findOrFail($id);
+        $department = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($department);
     }
 
@@ -61,8 +65,7 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, string $id)
     {
-        $department = Department::findOrFail($id);
-        $department->update($request->only([
+        $department = $this->repository->update($id, $request->only([
             'clinic_id',
             'name',
             'specialty',
@@ -80,8 +83,7 @@ class DepartmentController extends Controller
      */
     public function destroy(string $id)
     {
-        $department = Department::findOrFail($id);
-        $department->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Department deleted successfully');
     }
 }

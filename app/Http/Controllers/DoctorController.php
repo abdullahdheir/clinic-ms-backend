@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
-use App\Models\Doctor;
+use App\Repositories\DoctorRepository;
 use App\Traits\ApiResponse;
 
 class DoctorController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private DoctorRepository $repository
+    ) {}
 
     /**
      * Get all doctors with user and department details
@@ -18,7 +22,7 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        $doctors = Doctor::with(['user', 'department'])->get();
+        $doctors = $this->repository->allWithRelations();
         return $this->successResponse($doctors);
     }
 
@@ -30,7 +34,7 @@ class DoctorController extends Controller
      */
     public function store(StoreDoctorRequest $request)
     {
-        $doctor = Doctor::create($request->only([
+        $doctor = $this->repository->create($request->only([
             'user_id',
             'department_id',
             'bio',
@@ -49,7 +53,7 @@ class DoctorController extends Controller
      */
     public function show(string $id)
     {
-        $doctor = Doctor::with(['user', 'department.clinic'])->findOrFail($id);
+        $doctor = $this->repository->findWithRelationsOrFail($id);
         return $this->successResponse($doctor);
     }
 
@@ -62,8 +66,7 @@ class DoctorController extends Controller
      */
     public function update(UpdateDoctorRequest $request, string $id)
     {
-        $doctor = Doctor::findOrFail($id);
-        $doctor->update($request->only([
+        $doctor = $this->repository->update($id, $request->only([
             'user_id',
             'department_id',
             'bio',
@@ -82,8 +85,7 @@ class DoctorController extends Controller
      */
     public function destroy(string $id)
     {
-        $doctor = Doctor::findOrFail($id);
-        $doctor->delete();
+        $this->repository->delete($id);
         return $this->successResponse(null, 'Doctor deleted successfully');
     }
 }
