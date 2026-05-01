@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDoctorRequest;
+use App\Http\Requests\UpdateDoctorRequest;
 use App\Models\Doctor;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 
 class DoctorController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get all doctors with user and department details
      *
@@ -15,28 +19,26 @@ class DoctorController extends Controller
     public function index()
     {
         $doctors = Doctor::with(['user', 'department'])->get();
-        return response()->json($doctors);
+        return $this->successResponse($doctors);
     }
 
     /**
      * Create a new doctor profile
      *
-     * @param Request $request - Doctor data (user_id, department_id, bio, etc.)
+     * @param StoreDoctorRequest $request - Validated doctor data
      * @return \Illuminate\Http\JsonResponse - Created doctor
      */
-    public function store(Request $request)
+    public function store(StoreDoctorRequest $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'bio' => 'nullable|string',
-            'specialization' => 'nullable|string|max:255',
-            'session_duration_minutes' => 'integer|min:5',
-            'consultation_fee' => 'numeric|min:0',
-        ]);
-
-        $doctor = Doctor::create($request->all());
-        return response()->json($doctor, 201);
+        $doctor = Doctor::create($request->only([
+            'user_id',
+            'department_id',
+            'bio',
+            'specialization',
+            'session_duration_minutes',
+            'consultation_fee',
+        ]));
+        return $this->createdResponse($doctor);
     }
 
     /**
@@ -48,31 +50,28 @@ class DoctorController extends Controller
     public function show(string $id)
     {
         $doctor = Doctor::with(['user', 'department.clinic'])->findOrFail($id);
-        return response()->json($doctor);
+        return $this->successResponse($doctor);
     }
 
     /**
      * Update doctor details
      *
-     * @param Request $request - Updated doctor data
+     * @param UpdateDoctorRequest $request - Validated doctor data
      * @param string $id - Doctor ID
      * @return \Illuminate\Http\JsonResponse - Updated doctor
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDoctorRequest $request, string $id)
     {
         $doctor = Doctor::findOrFail($id);
-
-        $request->validate([
-            'user_id' => 'sometimes|required|exists:users,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'bio' => 'nullable|string',
-            'specialization' => 'nullable|string|max:255',
-            'session_duration_minutes' => 'integer|min:5',
-            'consultation_fee' => 'numeric|min:0',
-        ]);
-
-        $doctor->update($request->all());
-        return response()->json($doctor);
+        $doctor->update($request->only([
+            'user_id',
+            'department_id',
+            'bio',
+            'specialization',
+            'session_duration_minutes',
+            'consultation_fee',
+        ]));
+        return $this->successResponse($doctor);
     }
 
     /**
@@ -85,6 +84,6 @@ class DoctorController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         $doctor->delete();
-        return response()->json(['message' => 'Doctor deleted successfully']);
+        return $this->successResponse(null, 'Doctor deleted successfully');
     }
 }

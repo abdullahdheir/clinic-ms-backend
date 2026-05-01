@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMedicalFileRequest;
+use App\Http\Requests\UpdateMedicalFileRequest;
 use App\Models\MedicalFile;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Storage;
 
 class MedicalFileController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get all medical files with patient and visit details
      *
@@ -16,24 +20,17 @@ class MedicalFileController extends Controller
     public function index()
     {
         $files = MedicalFile::with(['patient', 'visit'])->get();
-        return response()->json($files);
+        return $this->successResponse($files);
     }
 
     /**
      * Upload a new medical file
      *
-     * @param Request $request - File data (patient_id, file, description)
+     * @param StoreMedicalFileRequest $request - Validated file data
      * @return \Illuminate\Http\JsonResponse - Created medical file
      */
-    public function store(Request $request)
+    public function store(StoreMedicalFileRequest $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:users,id',
-            'visit_id' => 'nullable|exists:visits,id',
-            'file' => 'required|file|max:10240',
-            'description' => 'nullable|string',
-        ]);
-
         $path = $request->file('file')->store('medical-files', 'public');
         
         $file = MedicalFile::create([
@@ -46,7 +43,7 @@ class MedicalFileController extends Controller
             'description' => $request->description,
         ]);
 
-        return response()->json($file, 201);
+        return $this->createdResponse($file);
     }
 
     /**
@@ -58,26 +55,21 @@ class MedicalFileController extends Controller
     public function show(string $id)
     {
         $file = MedicalFile::with(['patient', 'visit'])->findOrFail($id);
-        return response()->json($file);
+        return $this->successResponse($file);
     }
 
     /**
      * Update medical file description
      *
-     * @param Request $request - Updated description
+     * @param UpdateMedicalFileRequest $request - Validated description
      * @param string $id - Medical file ID
      * @return \Illuminate\Http\JsonResponse - Updated medical file
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateMedicalFileRequest $request, string $id)
     {
         $file = MedicalFile::findOrFail($id);
-
-        $request->validate([
-            'description' => 'nullable|string',
-        ]);
-
         $file->update($request->only('description'));
-        return response()->json($file);
+        return $this->successResponse($file);
     }
 
     /**
@@ -95,6 +87,6 @@ class MedicalFileController extends Controller
         }
         
         $file->delete();
-        return response()->json(['message' => 'Medical file deleted successfully']);
+        return $this->successResponse(null, 'Medical file deleted successfully');
     }
 }

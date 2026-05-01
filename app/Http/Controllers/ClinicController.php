@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreClinicRequest;
+use App\Http\Requests\UpdateClinicRequest;
 use App\Models\Clinic;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 
 class ClinicController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get all clinics with manager details
      *
@@ -15,29 +19,27 @@ class ClinicController extends Controller
     public function index()
     {
         $clinics = Clinic::with('manager')->get();
-        return response()->json($clinics);
+        return $this->successResponse($clinics);
     }
 
     /**
      * Create a new clinic
      *
-     * @param Request $request - Clinic data (name, address, phone, manager_id, etc.)
+     * @param StoreClinicRequest $request - Validated clinic data
      * @return \Illuminate\Http\JsonResponse - Created clinic
      */
-    public function store(Request $request)
+    public function store(StoreClinicRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'logo_url' => 'nullable|url',
-            'manager_id' => 'nullable|exists:users,id',
-            'working_hours' => 'nullable|array',
-            'is_active' => 'boolean',
-        ]);
-
-        $clinic = Clinic::create($request->all());
-        return response()->json($clinic, 201);
+        $clinic = Clinic::create($request->only([
+            'name',
+            'address',
+            'phone',
+            'logo_url',
+            'manager_id',
+            'working_hours',
+            'is_active',
+        ]));
+        return $this->createdResponse($clinic);
     }
 
     /**
@@ -49,32 +51,29 @@ class ClinicController extends Controller
     public function show(string $id)
     {
         $clinic = Clinic::with(['manager', 'departments'])->findOrFail($id);
-        return response()->json($clinic);
+        return $this->successResponse($clinic);
     }
 
     /**
      * Update clinic details
      *
-     * @param Request $request - Updated clinic data
+     * @param UpdateClinicRequest $request - Validated clinic data
      * @param string $id - Clinic ID
      * @return \Illuminate\Http\JsonResponse - Updated clinic
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateClinicRequest $request, string $id)
     {
         $clinic = Clinic::findOrFail($id);
-
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'logo_url' => 'nullable|url',
-            'manager_id' => 'nullable|exists:users,id',
-            'working_hours' => 'nullable|array',
-            'is_active' => 'boolean',
-        ]);
-
-        $clinic->update($request->all());
-        return response()->json($clinic);
+        $clinic->update($request->only([
+            'name',
+            'address',
+            'phone',
+            'logo_url',
+            'manager_id',
+            'working_hours',
+            'is_active',
+        ]));
+        return $this->successResponse($clinic);
     }
 
     /**
@@ -87,6 +86,6 @@ class ClinicController extends Controller
     {
         $clinic = Clinic::findOrFail($id);
         $clinic->delete();
-        return response()->json(['message' => 'Clinic deleted successfully']);
+        return $this->successResponse(null, 'Clinic deleted successfully');
     }
 }

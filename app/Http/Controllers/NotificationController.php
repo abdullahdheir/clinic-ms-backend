@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreNotificationRequest;
+use App\Http\Requests\UpdateNotificationRequest;
 use App\Models\Notification;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get user notifications
      *
@@ -18,28 +23,26 @@ class NotificationController extends Controller
         $notifications = Notification::where('user_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
-        return response()->json($notifications);
+        return $this->successResponse($notifications);
     }
 
     /**
      * Create a new notification
      *
-     * @param Request $request - Notification data (user_id, title, message, type)
+     * @param StoreNotificationRequest $request - Validated notification data
      * @return \Illuminate\Http\JsonResponse - Created notification
      */
-    public function store(Request $request)
+    public function store(StoreNotificationRequest $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'title' => 'required|string|max:255',
-            'message' => 'required|string',
-            'type' => 'in:info,success,warning,error',
-            'link' => 'nullable|string',
-            'data' => 'nullable|array',
-        ]);
-
-        $notification = Notification::create($request->all());
-        return response()->json($notification, 201);
+        $notification = Notification::create($request->only([
+            'user_id',
+            'title',
+            'message',
+            'type',
+            'link',
+            'data',
+        ]));
+        return $this->createdResponse($notification);
     }
 
     /**
@@ -51,26 +54,21 @@ class NotificationController extends Controller
     public function show(string $id)
     {
         $notification = Notification::with('user')->findOrFail($id);
-        return response()->json($notification);
+        return $this->successResponse($notification);
     }
 
     /**
      * Mark notification as read
      *
-     * @param Request $request - Update data
+     * @param UpdateNotificationRequest $request - Validated update data
      * @param string $id - Notification ID
      * @return \Illuminate\Http\JsonResponse - Updated notification
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateNotificationRequest $request, string $id)
     {
         $notification = Notification::findOrFail($id);
-
-        $request->validate([
-            'is_read' => 'boolean',
-        ]);
-
         $notification->update($request->only('is_read'));
-        return response()->json($notification);
+        return $this->successResponse($notification);
     }
 
     /**
@@ -83,6 +81,6 @@ class NotificationController extends Controller
     {
         $notification = Notification::findOrFail($id);
         $notification->delete();
-        return response()->json(['message' => 'Notification deleted successfully']);
+        return $this->successResponse(null, 'Notification deleted successfully');
     }
 }

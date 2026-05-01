@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDepartmentRequest;
+use App\Http\Requests\UpdateDepartmentRequest;
 use App\Models\Department;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 
 class DepartmentController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get all departments with clinic and doctors
      *
@@ -15,27 +19,25 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::with(['clinic', 'doctors'])->get();
-        return response()->json($departments);
+        return $this->successResponse($departments);
     }
 
     /**
      * Create a new department
      *
-     * @param Request $request - Department data (clinic_id, name, specialty, etc.)
+     * @param StoreDepartmentRequest $request - Validated department data
      * @return \Illuminate\Http\JsonResponse - Created department
      */
-    public function store(Request $request)
+    public function store(StoreDepartmentRequest $request)
     {
-        $request->validate([
-            'clinic_id' => 'required|exists:clinics,id',
-            'name' => 'required|string|max:255',
-            'specialty' => 'nullable|string|max:255',
-            'max_capacity' => 'integer|min:1',
-            'description' => 'nullable|string',
-        ]);
-
-        $department = Department::create($request->all());
-        return response()->json($department, 201);
+        $department = Department::create($request->only([
+            'clinic_id',
+            'name',
+            'specialty',
+            'max_capacity',
+            'description',
+        ]));
+        return $this->createdResponse($department);
     }
 
     /**
@@ -47,30 +49,27 @@ class DepartmentController extends Controller
     public function show(string $id)
     {
         $department = Department::with(['clinic', 'doctors.user'])->findOrFail($id);
-        return response()->json($department);
+        return $this->successResponse($department);
     }
 
     /**
      * Update department details
      *
-     * @param Request $request - Updated department data
+     * @param UpdateDepartmentRequest $request - Validated department data
      * @param string $id - Department ID
      * @return \Illuminate\Http\JsonResponse - Updated department
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDepartmentRequest $request, string $id)
     {
         $department = Department::findOrFail($id);
-
-        $request->validate([
-            'clinic_id' => 'sometimes|required|exists:clinics,id',
-            'name' => 'sometimes|required|string|max:255',
-            'specialty' => 'nullable|string|max:255',
-            'max_capacity' => 'integer|min:1',
-            'description' => 'nullable|string',
-        ]);
-
-        $department->update($request->all());
-        return response()->json($department);
+        $department->update($request->only([
+            'clinic_id',
+            'name',
+            'specialty',
+            'max_capacity',
+            'description',
+        ]));
+        return $this->successResponse($department);
     }
 
     /**
@@ -83,6 +82,6 @@ class DepartmentController extends Controller
     {
         $department = Department::findOrFail($id);
         $department->delete();
-        return response()->json(['message' => 'Department deleted successfully']);
+        return $this->successResponse(null, 'Department deleted successfully');
     }
 }

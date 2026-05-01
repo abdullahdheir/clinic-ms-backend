@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
 use App\Models\Appointment;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 
 class AppointmentController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get all appointments with related data
      *
@@ -15,28 +19,26 @@ class AppointmentController extends Controller
     public function index()
     {
         $appointments = Appointment::with(['patient', 'doctor.user', 'department'])->get();
-        return response()->json($appointments);
+        return $this->successResponse($appointments);
     }
 
     /**
      * Create a new appointment
      *
-     * @param Request $request - Appointment data (patient_id, doctor_id, appointment_date, reason)
+     * @param StoreAppointmentRequest $request - Validated appointment data
      * @return \Illuminate\Http\JsonResponse - Created appointment
      */
-    public function store(Request $request)
+    public function store(StoreAppointmentRequest $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:users,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'appointment_date' => 'required|date|after:now',
-            'reason' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
-
-        $appointment = Appointment::create($request->all());
-        return response()->json($appointment, 201);
+        $appointment = Appointment::create($request->only([
+            'patient_id',
+            'doctor_id',
+            'department_id',
+            'appointment_date',
+            'reason',
+            'notes',
+        ]));
+        return $this->createdResponse($appointment);
     }
 
     /**
@@ -48,34 +50,31 @@ class AppointmentController extends Controller
     public function show(string $id)
     {
         $appointment = Appointment::with(['patient', 'doctor.user', 'department', 'checkedInBy'])->findOrFail($id);
-        return response()->json($appointment);
+        return $this->successResponse($appointment);
     }
 
     /**
      * Update appointment status or details
      *
-     * @param Request $request - Updated appointment data
+     * @param UpdateAppointmentRequest $request - Validated appointment data
      * @param string $id - Appointment ID
      * @return \Illuminate\Http\JsonResponse - Updated appointment
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateAppointmentRequest $request, string $id)
     {
         $appointment = Appointment::findOrFail($id);
-
-        $request->validate([
-            'patient_id' => 'sometimes|required|exists:users,id',
-            'doctor_id' => 'sometimes|required|exists:doctors,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'appointment_date' => 'sometimes|required|date',
-            'status' => 'sometimes|required|in:pending,confirmed,completed,cancelled,no_show',
-            'reason' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'checked_in_at' => 'nullable|date',
-            'checked_in_by' => 'nullable|exists:users,id',
-        ]);
-
-        $appointment->update($request->all());
-        return response()->json($appointment);
+        $appointment->update($request->only([
+            'patient_id',
+            'doctor_id',
+            'department_id',
+            'appointment_date',
+            'status',
+            'reason',
+            'notes',
+            'checked_in_at',
+            'checked_in_by',
+        ]));
+        return $this->successResponse($appointment);
     }
 
     /**
@@ -88,6 +87,6 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $appointment->delete();
-        return response()->json(['message' => 'Appointment deleted successfully']);
+        return $this->successResponse(null, 'Appointment deleted successfully');
     }
 }
