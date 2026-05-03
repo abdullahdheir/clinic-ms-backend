@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
 });
 
-    Route::apiResource('clinics', ClinicController::class);
+    Route::apiResource('clinics', ClinicController::class)->middleware('role:manager|super_admin');
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('doctors', DoctorController::class);
     Route::apiResource('doctor-shifts', DoctorShiftController::class);

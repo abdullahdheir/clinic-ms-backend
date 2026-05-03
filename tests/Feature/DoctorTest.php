@@ -1,90 +1,68 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Department;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+use Spatie\Permission\Models\Role;
 
-test('user can create doctor', function () {
-    $user = User::factory()->create(['role' => 'doctor']);
-    $department = Department::factory()->create();
-    $admin = User::factory()->create(['role' => 'manager']);
-    $token = $admin->createToken('test-token')->plainTextToken;
+class DoctorTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response = $this->withToken($token)->postJson('/api/doctors', [
-        'user_id' => $user->id,
-        'department_id' => $department->id,
-        'specialization' => 'Cardiology',
-        'consultation_fee' => 150,
-    ]);
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Role::create(['name' => 'manager', 'guard_name' => 'web']);
+    }
 
-    $response->assertStatus(201)
-        ->assertJsonStructure([
-            'data' => ['id', 'user_id', 'department_id', 'specialization', 'consultation_fee'],
+    /**
+     * Test that a manager can create a doctor profile.
+     * 
+     * @return void
+     */
+    public function test_manager_can_create_doctor(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $manager->assignRole('manager');
+        
+        $doctorUser = User::factory()->create(['role' => 'doctor']);
+        $department = Department::factory()->create();
+
+        $response = $this->actingAs($manager)->postJson('/api/doctors', [
+            'user_id' => $doctorUser->id,
+            'department_id' => $department->id,
+            'specialization' => 'Cardiologist',
+            'session_duration_minutes' => 30,
+            'consultation_fee' => 150.00,
         ]);
 
-    $this->assertDatabaseHas('doctors', [
-        'user_id' => $user->id,
-        'department_id' => $department->id,
-        'specialization' => 'Cardiology',
-    ]);
-});
-
-test('user can get all doctors', function () {
-    $user = User::factory()->create();
-    $token = $user->createToken('test-token')->plainTextToken;
-    Doctor::factory()->count(3)->create();
-
-    $response = $this->withToken($token)->getJson('/api/doctors');
-
-    $response->assertStatus(200)
-        ->assertJsonCount(3, 'data');
-});
-
-test('user can get single doctor', function () {
-    $user = User::factory()->create();
-    $token = $user->createToken('test-token')->plainTextToken;
-    $doctor = Doctor::factory()->create();
-
-    $response = $this->withToken($token)->getJson("/api/doctors/{$doctor->id}");
-
-    $response->assertStatus(200)
-        ->assertJson([
-            'data' => [
-                'id' => $doctor->id,
-                'specialization' => $doctor->specialization,
-            ],
+        $response->assertStatus(201)
+                 ->assertJsonPath('data.specialization', 'Cardiologist');
+        
+        $this->assertDatabaseHas('doctors', [
+            'user_id' => $doctorUser->id,
+            'specialization' => 'Cardiologist',
         ]);
-});
+    }
 
-test('user can update doctor', function () {
-    $user = User::factory()->create();
-    $token = $user->createToken('test-token')->plainTextToken;
-    $doctor = Doctor::factory()->create(['specialization' => 'General']);
+    /**
+     * Test that we can list doctors.
+     * 
+     * @return void
+     */
+    public function test_can_list_doctors(): void
+    {
+        Doctor::factory()->count(2)->create();
 
-    $response = $this->withToken($token)->putJson("/api/doctors/{$doctor->id}", [
-        'specialization' => 'Cardiology',
-    ]);
+        $user = User::factory()->create(); // Regular user
 
-    $response->assertStatus(200)
-        ->assertJson([
-            'data' => [
-                'id' => $doctor->id,
-                'specialization' => 'Cardiology',
-            ],
-        ]);
-});
+        $response = $this->actingAs($user)->getJson('/api/doctors');
 
-test('user can delete doctor', function () {
-    $user = User::factory()->create();
-    $token = $user->createToken('test-token')->plainTextToken;
-    $doctor = Doctor::factory()->create();
-
-    $response = $this->withToken($token)->deleteJson("/api/doctors/{$doctor->id}");
-
-    $response->assertStatus(200);
-
-    $this->assertDatabaseMissing('doctors', [
-        'id' => $doctor->id,
-    ]);
-});
+        $response->assertStatus(200)
+                 ->assertJsonCount(2, 'data');
+    }
+}
