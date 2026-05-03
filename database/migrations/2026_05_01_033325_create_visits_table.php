@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
+            $table->foreignId('medical_record_id')->constrained('medical_records')->onDelete('cascade');
             $table->foreignId('appointment_id')->nullable()->constrained('appointments')->onDelete('set null');
-            $table->dateTime('visit_date');
-            $table->text('chief_complaint')->nullable();
+            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
+            $table->foreignId('clinic_id')->constrained('clinics')->onDelete('cascade');
+            $table->dateTime('visited_at');
             $table->text('diagnosis')->nullable();
-            $table->text('prescription')->nullable();
+            $table->json('prescription')->nullable();
             $table->text('notes')->nullable();
-            $table->enum('visit_type', ['consultation', 'follow_up', 'emergency'])->default('consultation');
             $table->timestamps();
         });
     }

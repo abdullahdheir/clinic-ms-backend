@@ -8,18 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['patient_id', 'doctor_id', 'appointment_id', 'visit_date', 'chief_complaint', 'diagnosis', 'prescription', 'notes', 'visit_type'])]
-#[Casts(['visit_date' => 'datetime'])]
+#[Fillable(['medical_record_id', 'appointment_id', 'doctor_id', 'clinic_id', 'visited_at', 'diagnosis', 'prescription', 'notes'])]
 class Visit extends Model
 {
-    public function patient(): BelongsTo
+    protected $casts = [
+        'visited_at' => 'datetime',
+        'prescription' => 'array',
+    ];
+
+    public function medicalRecord(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'patient_id');
+        return $this->belongsTo(MedicalRecord::class);
     }
 
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
+    }
+
+    public function clinic(): BelongsTo
+    {
+        return $this->belongsTo(Clinic::class);
     }
 
     public function appointment(): BelongsTo

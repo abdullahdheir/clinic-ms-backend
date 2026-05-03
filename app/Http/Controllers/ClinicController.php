@@ -23,6 +23,7 @@ class ClinicController extends Controller
     public function index()
     {
         $clinics = $this->repository->allWithRelations();
+        
         return $this->successResponse($clinics);
     }
 
@@ -43,6 +44,7 @@ class ClinicController extends Controller
             'working_hours',
             'is_active',
         ]));
+
         return $this->createdResponse($clinic);
     }
 
@@ -55,6 +57,7 @@ class ClinicController extends Controller
     public function show(string $id)
     {
         $clinic = $this->repository->findWithRelationsOrFail($id);
+
         return $this->successResponse($clinic);
     }
 
@@ -76,6 +79,7 @@ class ClinicController extends Controller
             'working_hours',
             'is_active',
         ]));
+
         return $this->successResponse($clinic);
     }
 
@@ -88,6 +92,7 @@ class ClinicController extends Controller
     public function destroy(string $id)
     {
         $this->repository->delete($id);
+
         return $this->successResponse(null, 'Clinic deleted successfully');
     }
 }

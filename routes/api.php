@@ -15,18 +15,24 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function(){
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::prefix('auth')->group(function(){
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+});
 
     Route::apiResource('clinics', ClinicController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('doctors', DoctorController::class);
     Route::apiResource('doctor-shifts', DoctorShiftController::class);
+    Route::apiResource('patients', \App\Http\Controllers\PatientController::class);
+    
+    Route::get('appointments/today', [AppointmentController::class, 'today']);
+    Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
     Route::apiResource('appointments', AppointmentController::class);
+    
     Route::apiResource('medical-records', MedicalRecordController::class);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('day_of_week', ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
             $table->time('start_time');
             $table->time('end_time');
+            $table->integer('max_appointments')->default(10);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
