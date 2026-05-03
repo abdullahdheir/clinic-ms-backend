@@ -2,25 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDepartmentRequest;
-use App\Http\Requests\UpdateDepartmentRequest;
+use App\Http\Requests\Department\StoreDepartmentRequest;
+use App\Http\Requests\Department\UpdateDepartmentRequest;
 use App\Repositories\DepartmentRepository;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class DepartmentController extends Controller
 {
     use ApiResponse;
 
+    /**
+     * DepartmentController constructor.
+     * 
+     * @param DepartmentRepository $repository The department repository instance.
+     */
     public function __construct(
         private DepartmentRepository $repository
     ) {}
 
     /**
-     * Get all departments with clinic and doctors
-     *
-     * @return \Illuminate\Http\JsonResponse - List of departments
+     * Display a listing of the departments.
+     * 
+     * @return JsonResponse List of departments with clinic and doctors.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $departments = $this->repository->allWithRelations();
         return $this->successResponse($departments);

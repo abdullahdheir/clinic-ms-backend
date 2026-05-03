@@ -9,6 +9,7 @@ use App\Http\Controllers\DoctorShiftController;
 use App\Http\Controllers\MedicalFileController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\VisitController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('doctors', DoctorController::class);
     Route::apiResource('doctor-shifts', DoctorShiftController::class);
-    Route::apiResource('patients', \App\Http\Controllers\PatientController::class);
+    Route::apiResource('patients', PatientController::class);
     
     Route::get('appointments/today', [AppointmentController::class, 'today']);
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);

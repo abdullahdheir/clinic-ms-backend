@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,13 +12,15 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Register a new user
-     *
-     * @param Request $request - Contains user registration data (name, email, password, role, etc.)
-     * @return \Illuminate\Http\JsonResponse - Returns created user and auth token
+     * Register a new user and assign a role.
+     * 
+     * @param Request $request The registration request.
+     * @return JsonResponse User details and auth token.
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -40,22 +44,25 @@ class AuthController extends Controller
             'gender' => $request->gender,
         ]);
 
+        // Assign role using Spatie
+        $user->assignRole($request->role);
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
+        return $this->createdResponse([
+            'user' => $user->load('roles', 'permissions'),
             'token' => $token,
-        ], 201);
+        ], 'User registered successfully');
     }
 
     /**
-     * Authenticate user and return token
-     *
-     * @param Request $request - Contains email and password
-     * @return \Illuminate\Http\JsonResponse - Returns authenticated user and auth token
-     * @throws ValidationException - If credentials are invalid
+     * Authenticate user and return token.
+     * 
+     * @param Request $request The login request.
+     * @return JsonResponse User details and auth token.
+     * @throws ValidationException
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -71,33 +78,32 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
+        return $this->successResponse([
+            'user' => $user->load('roles', 'permissions'),
             'token' => $token,
-        ]);
+        ], 'Logged in successfully');
     }
 
     /**
-     * Logout user and revoke current token
-     *
-     * @param Request $request - Authenticated request
-     * @return \Illuminate\Http\JsonResponse - Success message
+     * Logout user and revoke current token.
+     * 
+     * @param Request $request The authenticated request.
+     * @return JsonResponse Success message.
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Logged out successfully']);
+        return $this->successResponse(null, 'Logged out successfully');
     }
 
     /**
-     * Get authenticated user details
-     *
-     * @param Request $request - Authenticated request
-     * @return \Illuminate\Http\JsonResponse - User data
+     * Get authenticated user details with roles and permissions.
+     * 
+     * @param Request $request The authenticated request.
+     * @return JsonResponse User data.
      */
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        return $this->successResponse($request->user()->load('roles', 'permissions'));
     }
 }

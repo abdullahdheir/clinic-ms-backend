@@ -2,92 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreMedicalRecordRequest;
-use App\Http\Requests\UpdateMedicalRecordRequest;
+use App\Http\Requests\MedicalRecord\UpdateMedicalRecordRequest;
 use App\Repositories\MedicalRecordRepository;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class MedicalRecordController extends Controller
 {
     use ApiResponse;
 
+    /**
+     * MedicalRecordController constructor.
+     * 
+     * @param MedicalRecordRepository $repository The medical record repository instance.
+     */
     public function __construct(
         private MedicalRecordRepository $repository
     ) {}
 
     /**
-     * Get all medical records with patient and doctor details
-     *
-     * @return \Illuminate\Http\JsonResponse - List of medical records
+     * Display the specified medical record by patient ID.
+     * 
+     * @param int|string $patientId The patient ID.
+     * @return JsonResponse The medical record with patient info and visits.
      */
-    public function index()
+    public function show(int|string $patientId): JsonResponse
     {
-        $records = $this->repository->allWithRelations();
-        return $this->successResponse($records);
+        $medicalRecord = $this->repository->findByPatientId($patientId);
+        return $this->successResponse($medicalRecord);
     }
 
     /**
-     * Create a new medical record
-     *
-     * @param StoreMedicalRecordRequest $request - Validated medical record data
-     * @return \Illuminate\Http\JsonResponse - Created medical record
+     * Update the specified medical record in storage.
+     * 
+     * @param UpdateMedicalRecordRequest $request The validated update request.
+     * @param int|string $id The medical record ID.
+     * @return JsonResponse The updated medical record.
      */
-    public function store(StoreMedicalRecordRequest $request)
+    public function update(UpdateMedicalRecordRequest $request, int|string $id): JsonResponse
     {
-        $record = $this->repository->create($request->only([
-            'patient_id',
-            'doctor_id',
-            'allergies',
-            'chronic_diseases',
-            'medications',
-            'family_history',
-            'notes',
-        ]));
-        return $this->createdResponse($record);
-    }
-
-    /**
-     * Get specific medical record
-     *
-     * @param string $id - Medical record ID
-     * @return \Illuminate\Http\JsonResponse - Medical record details
-     */
-    public function show(string $id)
-    {
-        $record = $this->repository->findWithRelationsOrFail($id);
-        return $this->successResponse($record);
-    }
-
-    /**
-     * Update medical record
-     *
-     * @param UpdateMedicalRecordRequest $request - Validated medical record data
-     * @param string $id - Medical record ID
-     * @return \Illuminate\Http\JsonResponse - Updated medical record
-     */
-    public function update(UpdateMedicalRecordRequest $request, string $id)
-    {
-        $record = $this->repository->update($id, $request->only([
-            'patient_id',
-            'doctor_id',
-            'allergies',
-            'chronic_diseases',
-            'medications',
-            'family_history',
-            'notes',
-        ]));
-        return $this->successResponse($record);
-    }
-
-    /**
-     * Delete a medical record
-     *
-     * @param string $id - Medical record ID
-     * @return \Illuminate\Http\JsonResponse - Success message
-     */
-    public function destroy(string $id)
-    {
-        $this->repository->delete($id);
-        return $this->successResponse(null, 'Medical record deleted successfully');
+        $medicalRecord = $this->repository->update($id, $request->validated());
+        return $this->successResponse($medicalRecord, 'Medical record updated successfully');
     }
 }

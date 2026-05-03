@@ -2,25 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDoctorRequest;
-use App\Http\Requests\UpdateDoctorRequest;
+use App\Http\Requests\Doctor\StoreDoctorRequest;
+use App\Http\Requests\Doctor\UpdateDoctorRequest;
 use App\Repositories\DoctorRepository;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class DoctorController extends Controller
 {
     use ApiResponse;
 
+    /**
+     * DoctorController constructor.
+     * 
+     * @param DoctorRepository $repository The doctor repository instance.
+     */
     public function __construct(
         private DoctorRepository $repository
     ) {}
 
     /**
-     * Get all doctors with user and department details
-     *
-     * @return \Illuminate\Http\JsonResponse - List of doctors
+     * Display a listing of the doctors.
+     * 
+     * @return JsonResponse List of doctors with user and department details.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $doctors = $this->repository->allWithRelations();
         return $this->successResponse($doctors);

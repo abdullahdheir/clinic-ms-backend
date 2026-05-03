@@ -48,4 +48,17 @@ class MedicalRecordRepository extends BaseRepository
     {
         return $this->model->with(['patient', 'doctor.user'])->findOrFail($id);
     }
+
+    /**
+     * Find medical record by patient ID.
+     * 
+     * @param int|string $patientId The patient ID.
+     * @return MedicalRecord
+     */
+    public function findByPatientId(int|string $patientId): MedicalRecord
+    {
+        return $this->model->where('patient_id', $patientId)
+            ->with(['patient', 'visits.doctor.user'])
+            ->firstOrFail();
+    }
 }
