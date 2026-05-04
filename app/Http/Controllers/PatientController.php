@@ -32,6 +32,28 @@ class PatientController extends Controller
     }
 
     /**
+     * Store a newly created patient in storage.
+     * 
+     * @param Request $request The store request.
+     * @return JsonResponse The created patient.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'nullable|string|max:20',
+            'national_id' => 'nullable|string|max:50',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:male,female',
+            'blood_type' => 'nullable|string|max:5',
+        ]);
+
+        $patient = $this->repository->createPatient($request->all());
+        return $this->createdResponse($patient, 'Patient created successfully');
+    }
+
+    /**
      * Display the specified patient.
      * 
      * @param int|string $id The patient ID.

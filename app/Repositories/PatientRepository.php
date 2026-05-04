@@ -40,6 +40,32 @@ class PatientRepository extends BaseRepository
     }
 
     /**
+     * Create a new patient (user with role patient).
+     * 
+     * @param array $data The patient data.
+     * @return User The created patient.
+     */
+    public function createPatient(array $data): User
+    {
+        $data['role'] = 'patient';
+        if (isset($data['password'])) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+        } else {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make('password123'); // Default password
+        }
+
+        $user = $this->create($data);
+        $user->assignRole('patient');
+
+        // Create empty medical record
+        $user->medicalRecord()->create([
+            'blood_type' => $data['blood_type'] ?? null,
+        ]);
+
+        return $user->load('medicalRecord');
+    }
+
+    /**
      * Find patient or throw exception.
      * 
      * @param int|string $id The patient ID.
