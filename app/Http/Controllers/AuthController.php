@@ -106,4 +106,26 @@ class AuthController extends Controller
     {
         return $this->successResponse($request->user()->load('roles', 'permissions'));
     }
+
+    /**
+     * Update authenticated user profile.
+     * 
+     * @param Request $request
+     * @return JsonResponse User data.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'national_id' => 'nullable|string|max:50',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
+        ]);
+
+        $user->update($request->only('name', 'phone', 'national_id', 'email'));
+
+        return $this->successResponse($user->load('roles', 'permissions'), 'Profile updated successfully');
+    }
 }

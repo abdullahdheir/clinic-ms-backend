@@ -20,9 +20,10 @@ Route::prefix('auth')->group(function(){
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function(){
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('me', [AuthController::class, 'me']);
-});
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('me', [AuthController::class, 'me']);
+        Route::put('profile', [AuthController::class, 'updateProfile']);
+    });
 
     Route::apiResource('clinics', ClinicController::class)->middleware('role:manager|super_admin');
     Route::apiResource('departments', DepartmentController::class);
