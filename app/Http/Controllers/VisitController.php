@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Visit\StoreVisitRequest;
 use App\Http\Requests\Visit\UpdateVisitRequest;
 use App\Repositories\VisitRepository;
+use App\Models\Visit;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -39,7 +41,22 @@ class VisitController extends Controller
      */
     public function store(StoreVisitRequest $request)
     {
-        $visit = $this->repository->create($request->validated());
+        $data = $request->validated();
+
+        if (!isset($data['medical_record_id']) && isset($data['patient_id'])) {
+            $patient = User::findOrFail($data['patient_id']);
+            $medicalRecord = $patient->medicalRecord;
+            
+            if (!$medicalRecord) {
+                $medicalRecord = $patient->medicalRecord()->create([
+                    'blood_type' => null,
+                ]);
+            }
+            
+            $data['medical_record_id'] = $medicalRecord->id;
+        }
+
+        $visit = $this->repository->create($data);
 
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
