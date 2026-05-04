@@ -112,7 +112,18 @@ class AppointmentController extends Controller
 
         $doctorId = $request->doctor_id;
         $date = Carbon::parse($request->date);
-        $dayOfWeek = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
+        
+        $dayOfWeekInt = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
+        $daysMap = [
+            0 => 'sunday',
+            1 => 'monday',
+            2 => 'tuesday',
+            3 => 'wednesday',
+            4 => 'thursday',
+            5 => 'friday',
+            6 => 'saturday',
+        ];
+        $dayOfWeek = $daysMap[$dayOfWeekInt];
 
         $doctor = Doctor::findOrFail($doctorId);
         

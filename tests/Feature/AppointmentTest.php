@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Doctor;
+use App\Models\DoctorShift;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Spatie\Permission\Models\Role;
@@ -94,5 +96,53 @@ class AppointmentTest extends TestCase
             'id' => $appointment->id,
             'status' => 'confirmed',
         ]);
+    }
+
+    /**
+     * Test getting available slots for a doctor.
+     * 
+     * @return void
+     */
+    public function test_can_get_available_slots(): void
+    {
+        $patient = User::factory()->create(['role' => 'patient']);
+        $patient->assignRole('patient');
+
+        $doctor = Doctor::factory()->create(['session_duration_minutes' => 30]);
+        
+        $date = Carbon::tomorrow();
+        
+        $dayOfWeekInt = $date->dayOfWeek;
+        $daysMap = [0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'];
+        $dayOfWeekString = $daysMap[$dayOfWeekInt];
+
+        // Create a shift for tomorrow
+        DoctorShift::create([
+            'doctor_id' => $doctor->id,
+            'day_of_week' => $dayOfWeekString,
+            'start_time' => '09:00:00',
+            'end_time' => '12:00:00',
+            'is_active' => true,
+        ]);
+
+        // Create an appointment blocking 09:30
+        Appointment::factory()->create([
+            'doctor_id' => $doctor->id,
+            'scheduled_at' => $date->copy()->setTime(9, 30, 0)->format('Y-m-d H:i:s'),
+            'status' => 'confirmed',
+        ]);
+
+        $response = $this->actingAs($patient)->getJson('/api/appointments/available-slots?doctor_id=' . $doctor->id . '&date=' . $date->format('Y-m-d'));
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // 09:00 to 12:00 = 3 hours = 6 slots of 30 mins
+        // 1 is booked, so 5 should be available
+        $this->assertCount(6, $data);
+        
+        $this->assertTrue($data[0]['is_available']); // 09:00
+        $this->assertFalse($data[1]['is_available']); // 09:30
+        $this->assertTrue($data[2]['is_available']); // 10:00
     }
 }
