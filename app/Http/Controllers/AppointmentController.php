@@ -5,8 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Appointment\StoreAppointmentRequest;
 use App\Http\Requests\Appointment\UpdateAppointmentStatusRequest;
 use App\Repositories\AppointmentRepository;
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\DoctorShift;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -90,5 +95,67 @@ class AppointmentController extends Controller
     {
         $this->repository->delete($id);
         return $this->noContentResponse();
+    }
+
+    /**
+     * Get available slots for a doctor on a specific date.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function availableSlots(Request $request): JsonResponse
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+            'date' => 'required|date',
+        ]);
+
+        $doctorId = $request->doctor_id;
+        $date = Carbon::parse($request->date);
+        $dayOfWeek = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
+
+        $doctor = Doctor::findOrFail($doctorId);
+        
+        $shift = DoctorShift::where('doctor_id', $doctorId)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$shift) {
+            return $this->successResponse([]);
+        }
+
+        $sessionDuration = $doctor->session_duration_minutes ?? 30;
+
+        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->start_time);
+        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->end_time);
+
+        $appointments = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('scheduled_at', $date->format('Y-m-d'))
+            ->whereNotIn('status', ['cancelled', 'no_show'])
+            ->get();
+
+        $slots = [];
+        $current = $startTime->copy();
+
+        while ($current->copy()->addMinutes($sessionDuration) <= $endTime) {
+            $slotStart = $current->copy();
+            $slotEnd = $current->copy()->addMinutes($sessionDuration);
+
+            $isBooked = $appointments->contains(function ($appointment) use ($slotStart, $slotEnd, $doctor) {
+                $aptStart = Carbon::parse($appointment->scheduled_at);
+                $aptEnd = $aptStart->copy()->addMinutes($doctor->session_duration_minutes ?? 30);
+                return ($slotStart < $aptEnd && $slotEnd > $aptStart);
+            });
+
+            $slots[] = [
+                'time' => $slotStart->format('H:i'),
+                'is_available' => !$isBooked
+            ];
+
+            $current->addMinutes($sessionDuration);
+        }
+
+        return $this->successResponse($slots);
     }
 }

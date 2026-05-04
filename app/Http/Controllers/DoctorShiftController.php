@@ -20,8 +20,14 @@ class DoctorShiftController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse - List of doctor shifts
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        if ($request->has('doctor_id')) {
+            $shifts = \App\Models\DoctorShift::with('doctor.user')
+                ->where('doctor_id', $request->doctor_id)
+                ->get();
+            return $this->successResponse($shifts);
+        }
         $shifts = $this->repository->allWithRelations();
         return $this->successResponse($shifts);
     }
