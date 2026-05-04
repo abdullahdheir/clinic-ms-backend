@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreVisitRequest;
-use App\Http\Requests\UpdateVisitRequest;
+use App\Http\Requests\Visit\StoreVisitRequest;
+use App\Http\Requests\Visit\UpdateVisitRequest;
 use App\Repositories\VisitRepository;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class VisitController extends Controller
 {
@@ -20,9 +21,13 @@ class VisitController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse - List of visits
      */
-    public function index()
+    public function index(Request $request)
     {
-        $visits = $this->repository->allWithRelations();
+        if ($request->has('patient_id')) {
+            $visits = $this->repository->allByPatientId($request->patient_id);
+        } else {
+            $visits = $this->repository->allWithRelations();
+        }
         return $this->successResponse($visits);
     }
 
@@ -34,18 +39,15 @@ class VisitController extends Controller
      */
     public function store(StoreVisitRequest $request)
     {
-        $visit = $this->repository->create($request->only([
-            'patient_id',
-            'doctor_id',
-            'appointment_id',
-            'visit_date',
-            'chief_complaint',
-            'diagnosis',
-            'prescription',
-            'notes',
-            'visit_type',
-        ]));
-        return $this->createdResponse($visit);
+        $visit = $this->repository->create($request->validated());
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $visit->addMedia($file)->toMediaCollection('medical_files');
+            }
+        }
+
+        return $this->createdResponse($visit->load('media'));
     }
 
     /**
@@ -69,17 +71,7 @@ class VisitController extends Controller
      */
     public function update(UpdateVisitRequest $request, string $id)
     {
-        $visit = $this->repository->update($id, $request->only([
-            'patient_id',
-            'doctor_id',
-            'appointment_id',
-            'visit_date',
-            'chief_complaint',
-            'diagnosis',
-            'prescription',
-            'notes',
-            'visit_type',
-        ]));
+        $visit = $this->repository->update($id, $request->validated());
         return $this->successResponse($visit);
     }
 
@@ -93,5 +85,25 @@ class VisitController extends Controller
     {
         $this->repository->delete($id);
         return $this->successResponse(null, 'Visit deleted successfully');
+    }
+
+    /**
+     * Upload files to an existing visit
+     */
+    public function uploadFiles(Request $request, string $id)
+    {
+        $visit = $this->repository->findOrFail($id);
+        
+        $request->validate([
+            'files.*' => 'required|file|max:10240',
+        ]);
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $visit->addMedia($file)->toMediaCollection('medical_files');
+            }
+        }
+
+        return $this->successResponse($visit->load('media'), 'Files uploaded successfully');
     }
 }

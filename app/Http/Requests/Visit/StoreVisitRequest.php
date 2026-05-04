@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visit;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVisitRequest extends FormRequest
@@ -15,15 +14,15 @@ class StoreVisitRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'patient_id' => 'required|exists:users,id',
+            'medical_record_id' => 'required|exists:medical_records,id',
+            'appointment_id' => 'required|exists:appointments,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
-            'visit_date' => 'required|date',
-            'chief_complaint' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
-            'prescription' => 'nullable|string',
+            'clinic_id' => 'required|exists:clinics,id',
+            'diagnosis' => 'required|string',
+            'prescription' => 'nullable|array',
             'notes' => 'nullable|string',
-            'visit_type' => 'required|in:consultation,follow_up,emergency',
+            'visited_at' => 'nullable|date',
+            'files.*' => 'nullable|file|max:10240',
         ];
     }
 }

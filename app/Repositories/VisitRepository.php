@@ -24,7 +24,20 @@ class VisitRepository extends BaseRepository
      */
     public function allWithRelations(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->with(['patient', 'doctor.user', 'appointment'])->get();
+        return $this->model->with(['doctor.user', 'appointment', 'media'])->latest()->get();
+    }
+
+    /**
+     * Get visits for a specific patient
+     *
+     * @param int|string $patientId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function allByPatientId(int|string $patientId): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->whereHas('medicalRecord', function ($q) use ($patientId) {
+            $q->where('patient_id', $patientId);
+        })->with(['doctor.user', 'appointment', 'media'])->latest()->get();
     }
 
     /**
@@ -46,6 +59,6 @@ class VisitRepository extends BaseRepository
      */
     public function findWithRelationsOrFail(int|string $id): Visit
     {
-        return $this->model->with(['patient', 'doctor.user', 'appointment', 'medicalFiles'])->findOrFail($id);
+        return $this->model->with(['doctor.user', 'appointment', 'media'])->findOrFail($id);
     }
 }

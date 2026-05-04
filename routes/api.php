@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('appointments', AppointmentController::class);
 
     Route::apiResource('medical-records', MedicalRecordController::class);
+    Route::post('visits/{visit}/files', [VisitController::class, 'uploadFiles']);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
     Route::apiResource('notifications', NotificationController::class);
