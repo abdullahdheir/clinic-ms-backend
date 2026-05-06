@@ -83,4 +83,50 @@ class NotificationController extends Controller
         $this->repository->delete($id);
         return $this->successResponse(null, 'Notification deleted successfully');
     }
+
+    /**
+     * Mark notification as read
+     *
+     * @param string $id - Notification ID
+     * @return \Illuminate\Http\JsonResponse - Updated notification
+     */
+    public function markAsRead(string $id)
+    {
+        $notification = $this->repository->findUserNotificationOrFail($id, request()->user()->id);
+        $notification->update(['is_read' => true]);
+        return $this->successResponse($notification);
+    }
+
+    /**
+     * Mark all notifications as read for current user
+     *
+     * @return \Illuminate\Http\JsonResponse - Success message with count
+     */
+    public function markAllAsRead()
+    {
+        $count = $this->repository->markAllAsReadForUser(request()->user()->id);
+        return $this->successResponse(null, "Marked {$count} notifications as read");
+    }
+
+    /**
+     * Get unread notifications count for current user
+     *
+     * @return \Illuminate\Http\JsonResponse - Unread count
+     */
+    public function unreadCount()
+    {
+        $count = $this->repository->getUnreadCountForUser(request()->user()->id);
+        return $this->successResponse(['count' => $count]);
+    }
+
+    /**
+     * Get latest notifications for current user
+     *
+     * @return \Illuminate\Http\JsonResponse - Latest notifications
+     */
+    public function latest()
+    {
+        $notifications = $this->repository->getLatestForUser(request()->user()->id, 10);
+        return $this->successResponse($notifications);
+    }
 }

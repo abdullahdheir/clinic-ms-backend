@@ -42,7 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
     Route::apiResource('notifications', NotificationController::class);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::get('notifications/latest', [NotificationController::class, 'latest']);
 
     Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'markAsPaid']);
     Route::apiResource('invoices', InvoiceController::class);
+
+    // Reports routes
+    Route::get('reports/dashboard', [ReportController::class, 'dashboard']);
+    Route::get('reports/appointments', [ReportController::class, 'appointments']);
+    Route::get('reports/revenue', [ReportController::class, 'revenue']);
+    Route::get('reports/patients', [ReportController::class, 'patients']);
+    Route::get('reports/doctors', [ReportController::class, 'doctors']);
 });

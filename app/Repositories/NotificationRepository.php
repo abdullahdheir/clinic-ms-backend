@@ -52,4 +52,57 @@ class NotificationRepository extends BaseRepository
     {
         return $this->model->with('user')->findOrFail($id);
     }
+
+    /**
+     * Find user notification or throw exception
+     *
+     * @param int|string $id
+     * @param int $userId
+     * @return Notification
+     */
+    public function findUserNotificationOrFail(int|string $id, int $userId): Notification
+    {
+        return $this->model->where('user_id', $userId)->findOrFail($id);
+    }
+
+    /**
+     * Mark all notifications as read for user
+     *
+     * @param int $userId
+     * @return int Number of updated notifications
+     */
+    public function markAllAsReadForUser(int $userId): int
+    {
+        return $this->model->where('user_id', $userId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+    }
+
+    /**
+     * Get unread notifications count for user
+     *
+     * @param int $userId
+     * @return int
+     */
+    public function getUnreadCountForUser(int $userId): int
+    {
+        return $this->model->where('user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+    }
+
+    /**
+     * Get latest notifications for user
+     *
+     * @param int $userId
+     * @param int $limit
+     * @return Collection
+     */
+    public function getLatestForUser(int $userId, int $limit = 10): Collection
+    {
+        return $this->model->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }
