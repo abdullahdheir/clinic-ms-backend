@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Notification extends Model
 {
     use HasFactory;
+    
     protected $casts = [
         'is_read' => 'boolean',
         'data' => 'array',

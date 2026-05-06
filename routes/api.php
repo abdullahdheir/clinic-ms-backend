@@ -11,6 +11,7 @@ use App\Http\Controllers\MedicalFileController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VisitController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,15 +42,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('visits/{visit}/files', [VisitController::class, 'uploadFiles']);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
-    Route::apiResource('notifications', NotificationController::class);
+    
+    Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'markAsPaid']);
+    Route::apiResource('invoices', InvoiceController::class);
+    
+    // Notification routes (require authentication)
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::get('notifications/latest', [NotificationController::class, 'latest']);
-
-    Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'markAsPaid']);
-    Route::apiResource('invoices', InvoiceController::class);
-
+    Route::apiResource('notifications', NotificationController::class);
+    
     // Reports routes
     Route::get('reports/dashboard', [ReportController::class, 'dashboard']);
     Route::get('reports/appointments', [ReportController::class, 'appointments']);

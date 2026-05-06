@@ -130,6 +130,6 @@ class NotificationController extends Controller
     public function latest()
     {
         $notifications = $this->repository->getLatestForUser(request()->user()->id, 10);
-        return $this->successResponse(NotificationResource::collection($notifications));
+        return $this->successResponse(NotificationResource::collection($notifications ));
     }
 }
