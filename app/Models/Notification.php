@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\NotificationPriority;
 use App\Enums\NotificationType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['user_id', 'title', 'message', 'type', 'priority', 'is_read', 'link', 'data'])]
 class Notification extends Model
 {
+    use HasFactory;
     protected $casts = [
         'is_read' => 'boolean',
         'data' => 'array',

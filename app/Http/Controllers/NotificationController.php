@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNotificationRequest;
 use App\Http\Requests\UpdateNotificationRequest;
+use App\Http\Resources\NotificationResource;
 use App\Repositories\NotificationRepository;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $notifications = $this->repository->getByUserId($request->user()->id);
-        return $this->successResponse($notifications);
+        return $this->successResponse(NotificationResource::collection($notifications));
     }
 
     /**
@@ -44,7 +45,7 @@ class NotificationController extends Controller
             'link',
             'data',
         ]));
-        return $this->createdResponse($notification);
+        return $this->createdResponse(new NotificationResource($notification));
     }
 
     /**
@@ -55,8 +56,8 @@ class NotificationController extends Controller
      */
     public function show(string $id)
     {
-        $notification = $this->repository->findWithRelationsOrFail($id);
-        return $this->successResponse($notification);
+        $notification = $this->repository->findUserNotificationOrFail($id, request()->user()->id);
+        return $this->successResponse(new NotificationResource($notification));
     }
 
     /**
@@ -68,8 +69,9 @@ class NotificationController extends Controller
      */
     public function update(UpdateNotificationRequest $request, string $id)
     {
-        $notification = $this->repository->update($id, $request->only('is_read'));
-        return $this->successResponse($notification);
+        $notification = $this->repository->findUserNotificationOrFail($id, request()->user()->id);
+        $notification->update($request->only('is_read'));
+        return $this->successResponse(new NotificationResource($notification));
     }
 
     /**
@@ -80,6 +82,7 @@ class NotificationController extends Controller
      */
     public function destroy(string $id)
     {
+        $notification = $this->repository->findUserNotificationOrFail($id, request()->user()->id);
         $this->repository->delete($id);
         return $this->successResponse(null, 'Notification deleted successfully');
     }
@@ -94,7 +97,7 @@ class NotificationController extends Controller
     {
         $notification = $this->repository->findUserNotificationOrFail($id, request()->user()->id);
         $notification->update(['is_read' => true]);
-        return $this->successResponse($notification);
+        return $this->successResponse(new NotificationResource($notification));
     }
 
     /**
@@ -127,6 +130,6 @@ class NotificationController extends Controller
     public function latest()
     {
         $notifications = $this->repository->getLatestForUser(request()->user()->id, 10);
-        return $this->successResponse($notifications);
+        return $this->successResponse(NotificationResource::collection($notifications));
     }
 }

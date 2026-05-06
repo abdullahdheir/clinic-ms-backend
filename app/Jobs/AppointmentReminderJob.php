@@ -48,17 +48,17 @@ class AppointmentReminderJob implements ShouldQueue
         $appointments = Appointment::where('status', 'confirmed')
             ->where(function($query) use ($tomorrow, $inTwoHours) {
                 // 24 hour reminder
-                $query->whereBetween('appointment_time', [
+                $query->whereBetween('scheduled_at', [
                     Carbon::now()->addHours(23)->startOfMinute(),
                     Carbon::now()->addHours(25)->endOfMinute()
                 ])
                 // 2 hour reminder
-                ->orWhereBetween('appointment_time', [
+                ->orWhereBetween('scheduled_at', [
                     Carbon::now()->addHours(1)->startOfMinute(),
                     Carbon::now()->addHours(3)->endOfMinute()
                 ]);
             })
-            ->with(['patient.user', 'doctor.user', 'clinic'])
+            ->with(['patient', 'doctor.user', 'clinic'])
             ->get();
 
         foreach ($appointments as $appointment) {
@@ -69,7 +69,7 @@ class AppointmentReminderJob implements ShouldQueue
     private function sendReminder(Appointment $appointment): void
     {
         $now = Carbon::now();
-        $appointmentTime = Carbon::parse($appointment->appointment_time);
+        $appointmentTime = Carbon::parse($appointment->scheduled_at);
         $hoursUntil = $now->diffInHours($appointmentTime, false);
 
         // Determine reminder type and priority
@@ -89,7 +89,7 @@ class AppointmentReminderJob implements ShouldQueue
 
         // Send notification to patient
         $this->createNotification(
-            $appointment->patient->user_id,
+            $appointment->patient_id,
             $title,
             $message,
             NotificationType::APPOINTMENT_REMINDER,
@@ -99,8 +99,9 @@ class AppointmentReminderJob implements ShouldQueue
         );
 
         // Send email to patient
-        if ($appointment->patient->user->email) {
-            Mail::to($appointment->patient->user->email)
+        $patient = User::find($appointment->patient_id);
+        if ($patient && $patient->email) {
+            Mail::to($patient->email)
                 ->queue(new AppointmentReminderMail($appointment, $hoursUntil));
         }
 
@@ -108,7 +109,7 @@ class AppointmentReminderJob implements ShouldQueue
         $this->createNotification(
             $appointment->doctor->user_id,
             'موعد مع مريض',
-            "موعد مع {$appointment->patient->user->name} بعد {$hoursUntil} ساعات",
+            "موعد مع {$patient->name} بعد {$hoursUntil} ساعات",
             NotificationType::APPOINTMENT_REMINDER,
             NotificationPriority::MEDIUM,
             '/appointments/' . $appointment->id,
