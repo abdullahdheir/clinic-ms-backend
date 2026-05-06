@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'patient_id');
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin');

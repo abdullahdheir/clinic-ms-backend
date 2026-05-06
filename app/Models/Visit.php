@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-#[Fillable(['medical_record_id', 'appointment_id', 'doctor_id', 'clinic_id', 'visited_at', 'diagnosis', 'prescription', 'notes'])]
+#[Fillable(['medical_record_id', 'patient_id', 'appointment_id', 'doctor_id', 'clinic_id', 'visited_at', 'diagnosis', 'prescription', 'notes'])]
 class Visit extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
@@ -23,6 +23,11 @@ class Visit extends Model implements HasMedia
     public function medicalRecord(): BelongsTo
     {
         return $this->belongsTo(MedicalRecord::class);
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'patient_id');
     }
 
     public function doctor(): BelongsTo
@@ -43,5 +48,10 @@ class Visit extends Model implements HasMedia
     public function medicalFiles(): HasMany
     {
         return $this->hasMany(MedicalFile::class);
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
     }
 }

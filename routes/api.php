@@ -6,6 +6,7 @@ use App\Http\Controllers\ClinicController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorShiftController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalFileController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\NotificationController;
@@ -41,4 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
     Route::apiResource('notifications', NotificationController::class);
+
+    Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'markAsPaid']);
+    Route::apiResource('invoices', InvoiceController::class);
 });
