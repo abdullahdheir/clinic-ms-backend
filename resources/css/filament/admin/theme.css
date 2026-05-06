@@ -1,0 +1,670 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/filament';
+@source '../../views';
+@source '../../../../app/Filament';
+
+/* ═══════════════════════════════════════════════════
+   🎨 كلينيك برو — Premium RTL Medical Dashboard
+   ═══════════════════════════════════════════════════ */
+
+/* ── Brand Design Tokens ── */
+@theme {
+  --color-primary-50:  #E8F5F5;
+  --color-primary-100: #C5E8E8;
+  --color-primary-200: #8DD1D1;
+  --color-primary-300: #55BABA;
+  --color-primary-400: #1A9090;
+  --color-primary-500: #0B6E6E;
+  --color-primary-600: #095858;
+  --color-primary-700: #074444;
+  --color-primary-800: #053030;
+  --color-primary-900: #031C1C;
+  --color-primary-950: #010E0E;
+
+  --font-sans: 'Tajawal', sans-serif;
+  --font-mono: 'DM Sans', sans-serif;
+}
+
+/* ── Global RTL & Typography ── */
+html[dir="rtl"],
+[dir="rtl"],
+.fi-sidebar,
+.fi-main,
+.fi-topbar,
+.fi-body {
+  direction: rtl !important;
+}
+
+* {
+  font-family: 'Tajawal', sans-serif !important;
+}
+
+.fi-wi-stats-overview-stat-value,
+[class*="tabular-nums"],
+.fi-ta-cell[data-column="count"],
+.fi-ta-cell[data-column="fee"],
+.fi-ta-cell[data-column="appointments_count"] {
+  font-family: 'DM Sans', sans-serif !important;
+}
+
+/* ── Smooth base transitions ── */
+*,
+*::before,
+*::after {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════════════════════
+   🏗 SIDEBAR — Dark Gradient Design
+   ═══════════════════════════════════ */
+.fi-sidebar {
+  background: linear-gradient(180deg, #0F2B3A 0%, #1A3A4A 40%, #163545 100%) !important;
+  border-left: 1px solid rgba(255,255,255,0.04) !important;
+  border-right: none !important;
+}
+
+.fi-sidebar-header {
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 22px 18px !important;
+  background: rgba(0,0,0,0.1) !important;
+}
+
+/* Navigation items */
+.fi-sidebar-nav-item-btn {
+  color: rgba(255,255,255,0.55) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  margin: 2px 8px !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.fi-sidebar-nav-item-btn:hover {
+  background: rgba(11,110,110,0.15) !important;
+  color: rgba(255,255,255,0.9) !important;
+  transform: translateX(-2px);
+}
+
+.fi-sidebar-nav-item-btn.fi-active {
+  background: linear-gradient(135deg, #0B6E6E 0%, #0D8585 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(11,110,110,0.35) !important;
+  font-weight: 600 !important;
+}
+
+.fi-sidebar-nav-item-btn.fi-active svg {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.fi-sidebar-nav-item-btn svg {
+  color: inherit !important;
+  width: 20px !important;
+  height: 20px !important;
+  opacity: 0.8;
+  transition: all 0.2s ease !important;
+}
+
+.fi-sidebar-nav-item-btn:hover svg {
+  opacity: 1;
+}
+
+/* Navigation group labels */
+.fi-sidebar-group-label {
+  color: rgba(255,255,255,0.25) !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  padding: 0 22px !important;
+  margin-top: 16px !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar user info */
+.fi-sidebar-user-name {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+.fi-sidebar-user-email {
+  color: rgba(255,255,255,0.35) !important;
+  font-size: 11px !important;
+}
+
+/* ═══════════════════════════════
+   🔝 TOPBAR — Clean & Elevated
+   ═══════════════════════════════ */
+.fi-topbar {
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+}
+
+/* Global search */
+.fi-global-search-input {
+  background: #F4F5F7 !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.fi-global-search-input:focus {
+  background: white !important;
+  border-color: #0B6E6E !important;
+  box-shadow: 0 0 0 3px rgba(11,110,110,0.08) !important;
+}
+
+/* ═══════════════════════════════════
+   📊 STAT WIDGETS — Premium Cards
+   ═══════════════════════════════════ */
+.fi-wi-stats-overview-stat {
+  background: white !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+  transition: all 0.25s ease !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.fi-wi-stats-overview-stat::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 4px !important;
+  border-radius: 0 16px 16px 0 !important;
+  background: var(--stat-accent, #0B6E6E) !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+  border-color: rgba(11,110,110,0.15) !important;
+}
+
+/* Stat color accents via nth-child */
+.fi-wi-stats-overview-stat:nth-child(1) { --stat-accent: #0B6E6E; }
+.fi-wi-stats-overview-stat:nth-child(2) { --stat-accent: #2E9E6B; }
+.fi-wi-stats-overview-stat:nth-child(3) { --stat-accent: #3B82C4; }
+.fi-wi-stats-overview-stat:nth-child(4) { --stat-accent: #F0A500; }
+.fi-wi-stats-overview-stat:nth-child(5) { --stat-accent: #0B6E6E; }
+.fi-wi-stats-overview-stat:nth-child(6) { --stat-accent: #8B5CF6; }
+
+.fi-wi-stats-overview-stat-value {
+  color: #1A2B3A !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1.1 !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+  color: #6B7A8D !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.fi-wi-stats-overview-stat-description {
+  color: #8B97A7 !important;
+  font-size: 12px !important;
+}
+
+.fi-wi-stats-overview-stat-description-icon {
+  color: var(--stat-accent, #0B6E6E) !important;
+}
+
+/* Stat inline chart */
+.fi-wi-stats-overview-stat-chart {
+  opacity: 0.6 !important;
+}
+
+/* ═══════════════════════════════════
+   📦 CARDS & SECTIONS — Glassmorphism
+   ═══════════════════════════════════ */
+.fi-section,
+.fi-card {
+  background: white !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+  transition: box-shadow 0.25s ease !important;
+}
+
+.fi-section:hover,
+.fi-card:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06) !important;
+}
+
+.fi-section-heading {
+  font-weight: 700 !important;
+  color: #1A2B3A !important;
+  font-size: 16px !important;
+}
+
+/* ═══════════════════════════════
+   📋 TABLES — Refined & Modern
+   ═══════════════════════════════ */
+.fi-ta {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.fi-ta-header-cell {
+  background: linear-gradient(180deg, #F8F9FB 0%, #F3F4F7 100%) !important;
+  color: #6B7A8D !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-weight: 600 !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  white-space: nowrap !important;
+}
+
+.fi-ta-row {
+  transition: background-color 0.15s ease !important;
+}
+
+.fi-ta-row:hover .fi-ta-cell {
+  background: rgba(11,110,110,0.02) !important;
+}
+
+.fi-ta-cell {
+  border-bottom: 1px solid rgba(0,0,0,0.04) !important;
+  padding: 12px 16px !important;
+  font-size: 13.5px !important;
+  color: #2D3748 !important;
+}
+
+.fi-ta-row:last-child .fi-ta-cell {
+  border-bottom: none !important;
+}
+
+/* Table search & filters */
+.fi-ta-search-input {
+  border-radius: 12px !important;
+}
+
+/* Empty state */
+.fi-ta-empty-state-icon {
+  color: #C4CDD8 !important;
+}
+
+.fi-ta-empty-state-heading {
+  color: #6B7A8D !important;
+  font-weight: 600 !important;
+}
+
+/* ═══════════════════════════════
+   📊 CHART WIDGETS — Enhanced
+   ═══════════════════════════════ */
+.fi-wi-chart {
+  background: white !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+  overflow: hidden !important;
+}
+
+.fi-wi-chart-heading {
+  font-weight: 700 !important;
+  color: #1A2B3A !important;
+  font-size: 15px !important;
+}
+
+/* ═══════════════════════════════
+   🖊 INPUTS — Polished Forms
+   ═══════════════════════════════ */
+.fi-input,
+.fi-select-input {
+  border: 1.5px solid #D8DCE3 !important;
+  border-radius: 12px !important;
+  font-family: 'Tajawal', sans-serif !important;
+  transition: all 0.2s ease !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  background: #FAFBFC !important;
+}
+
+.fi-input:focus,
+.fi-select-input:focus {
+  border-color: #0B6E6E !important;
+  box-shadow: 0 0 0 3px rgba(11,110,110,0.08) !important;
+  outline: none !important;
+  background: white !important;
+}
+
+.fi-input:hover,
+.fi-select-input:hover {
+  border-color: #B0B7C3 !important;
+}
+
+/* Field labels */
+.fi-fo-field-wrp-label {
+  font-weight: 600 !important;
+  color: #374151 !important;
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+}
+
+/* ═══════════════════════════════
+   🔘 BUTTONS — Smooth & Premium
+   ═══════════════════════════════ */
+.fi-btn {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+  transition: all 0.2s ease !important;
+  letter-spacing: 0.01em !important;
+}
+
+.fi-btn-color-primary {
+  background: linear-gradient(135deg, #0B6E6E 0%, #0D8585 100%) !important;
+  border-color: #0B6E6E !important;
+  box-shadow: 0 2px 8px rgba(11,110,110,0.25) !important;
+}
+
+.fi-btn-color-primary:hover {
+  background: linear-gradient(135deg, #0D8585 0%, #0FA0A0 100%) !important;
+  box-shadow: 0 4px 12px rgba(11,110,110,0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.fi-btn-color-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 4px rgba(11,110,110,0.2) !important;
+}
+
+/* Secondary / outlined buttons */
+.fi-btn-color-gray {
+  border: 1.5px solid #D8DCE3 !important;
+  color: #4A5568 !important;
+  background: white !important;
+}
+
+.fi-btn-color-gray:hover {
+  background: #F7F8FA !important;
+  border-color: #B0B7C3 !important;
+}
+
+/* ═══════════════════════════════
+   🏷 BADGES — Soft & Colorful
+   ═══════════════════════════════ */
+.fi-badge {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  letter-spacing: 0.01em !important;
+}
+
+.fi-badge-color-success {
+  background: linear-gradient(135deg, #E6F8F1, #D4F0E6) !important;
+  color: #1B7A4A !important;
+}
+
+.fi-badge-color-warning {
+  background: linear-gradient(135deg, #FEF3DC, #FDE8C2) !important;
+  color: #7A5200 !important;
+}
+
+.fi-badge-color-danger {
+  background: linear-gradient(135deg, #FEF0F0, #FDE2E2) !important;
+  color: #C43434 !important;
+}
+
+.fi-badge-color-info {
+  background: linear-gradient(135deg, #EBF2FC, #DCE8F8) !important;
+  color: #2B6CB0 !important;
+}
+
+.fi-badge-color-primary {
+  background: linear-gradient(135deg, #E8F5F5, #D0EBEB) !important;
+  color: #0B6E6E !important;
+}
+
+.fi-badge-color-gray {
+  background: linear-gradient(135deg, #F1F3F5, #E5E8EC) !important;
+  color: #5A6675 !important;
+}
+
+/* ═══════════════════════════════
+   📄 PAGE HEADER
+   ═══════════════════════════════ */
+.fi-header {
+  padding-bottom: 8px !important;
+}
+
+.fi-header-heading {
+  color: #1A2B3A !important;
+  font-weight: 800 !important;
+  font-size: 24px !important;
+  font-family: 'Tajawal', sans-serif !important;
+  letter-spacing: -0.3px !important;
+}
+
+.fi-header-subheading {
+  color: #6B7A8D !important;
+  font-size: 14px !important;
+}
+
+/* Breadcrumbs */
+.fi-breadcrumbs {
+  font-size: 13px !important;
+  color: #8B97A7 !important;
+}
+
+.fi-breadcrumbs a:hover {
+  color: #0B6E6E !important;
+}
+
+/* ═══════════════════════════════
+   🔔 NOTIFICATIONS — Sleek Toast
+   ═══════════════════════════════ */
+.fi-no-notification {
+  border-radius: 14px !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* ═══════════════════════════════
+   💬 MODALS — Premium Overlay
+   ═══════════════════════════════ */
+.fi-modal-window {
+  border-radius: 20px !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.15) !important;
+}
+
+.fi-modal-heading {
+  font-weight: 700 !important;
+  color: #1A2B3A !important;
+}
+
+/* ═══════════════════════════════
+   ✅ TOGGLES & CHECKBOXES
+   ═══════════════════════════════ */
+.fi-toggle-input:checked {
+  background-color: #0B6E6E !important;
+}
+
+/* ═══════════════════════════════
+   📑 TABS — Clean Tab Design
+   ═══════════════════════════════ */
+.fi-tabs-tab {
+  border-radius: 10px 10px 0 0 !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.fi-tabs-tab-active {
+  color: #0B6E6E !important;
+  border-bottom-color: #0B6E6E !important;
+}
+
+/* ═══════════════════════════════
+   🔲 PAGINATION
+   ═══════════════════════════════ */
+.fi-pagination-item-btn {
+  border-radius: 10px !important;
+  transition: all 0.15s ease !important;
+}
+
+.fi-pagination-item-btn:hover {
+  background: #E8F5F5 !important;
+  color: #0B6E6E !important;
+}
+
+.fi-pagination-item-btn.fi-active {
+  background: #0B6E6E !important;
+  color: white !important;
+}
+
+/* ═══════════════════════════════
+   🎛 FILTERS
+   ═══════════════════════════════ */
+.fi-ta-filters-btn {
+  border-radius: 12px !important;
+}
+
+/* ═══════════════════════════════
+   📱 MAIN CONTENT AREA
+   ═══════════════════════════════ */
+.fi-main {
+  background: #F5F7FA !important;
+}
+
+.fi-page {
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════
+   🪟 WIDGET GRID — Dashboard Layout
+   ═══════════════════════════════ */
+.fi-wi-stats-overview {
+  margin-bottom: 4px !important;
+}
+
+/* Table widgets on dashboard */
+.fi-wi-table {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+/* ═══════════════════════════════
+   🔗 LINKS & INTERACTIVE
+   ═══════════════════════════════ */
+a.fi-link {
+  color: #0B6E6E !important;
+  transition: color 0.15s ease !important;
+}
+
+a.fi-link:hover {
+  color: #0D8585 !important;
+}
+
+/* ═══════════════════════════════
+   🎨 LOGIN PAGE — Premium Entry
+   ═══════════════════════════════ */
+.fi-simple-main {
+  background: linear-gradient(135deg, #0F2B3A 0%, #1A3A4A 50%, #0B6E6E 100%) !important;
+}
+
+.fi-simple-main-ctn {
+  background: white !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.2) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ═══════════════════════════════
+   📱 RESPONSIVE RTL TWEAKS
+   ═══════════════════════════════ */
+@media (max-width: 1024px) {
+  .fi-sidebar {
+    border-left: none !important;
+  }
+  
+  .fi-wi-stats-overview-stat-value {
+    font-size: 24px !important;
+  }
+}
+
+/* ═══════════════════════════════
+   ⏳ LOADING STATES
+   ═══════════════════════════════ */
+.fi-loading-indicator {
+  color: #0B6E6E !important;
+}
+
+/* Skeleton loading pulse */
+.fi-loading {
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ═══════════════════════════════
+   🎭 SCROLLBAR — Minimal
+   ═══════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ═══════════════════════════════
+   🔳 SELECTION / HIGHLIGHT
+   ═══════════════════════════════ */
+::selection {
+  background: rgba(11,110,110,0.15);
+  color: #053030;
+}

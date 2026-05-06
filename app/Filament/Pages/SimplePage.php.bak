@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use Filament\Pages\Page;
+
+class SimplePage extends Page
+{
+    protected static ?string $navigationLabel = 'صفحة بسيطة';
+    protected static string $view = 'filament.pages.simple';
+}

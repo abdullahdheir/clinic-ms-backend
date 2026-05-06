@@ -25,30 +25,44 @@ class DatabaseSeeder extends Seeder
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
+        
+        // Create Super Admin User
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin']);
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@clinic.com'],
+            [
+                'name'     => 'Super Admin',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $superAdmin->assignRole($superAdminRole);
 
         // Create Users
-        $managerUser = User::create([
-            'name' => 'Clinic Manager',
-            'email' => 'manager@clinic.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-        ]);
+        $managerUser = User::firstOrCreate(
+            ['email' => 'manager@clinic.com'],
+            [
+                'name' => 'Clinic Manager',
+                'password' => Hash::make('password'),
+            ]
+        );
         $managerUser->assignRole('manager');
 
-        $doctorUser = User::create([
-            'name' => 'Dr. Smith',
-            'email' => 'doctor@clinic.com',
-            'password' => Hash::make('password'),
-            'role' => 'doctor',
-        ]);
+        $doctorUser = User::firstOrCreate(
+            ['email' => 'doctor@clinic.com'],
+            [
+                'name' => 'Dr. Smith',
+                'password' => Hash::make('password'),
+            ]
+        );
         $doctorUser->assignRole('doctor');
 
-        $patientUser = User::create([
-            'name' => 'John Doe',
-            'email' => 'patient@clinic.com',
-            'password' => Hash::make('password'),
-            'role' => 'patient',
-        ]);
+        $patientUser = User::firstOrCreate(
+            ['email' => 'patient@clinic.com'],
+            [
+                'name' => 'John Doe',
+                'password' => Hash::make('password'),
+            ]
+        );
         $patientUser->assignRole('patient');
 
         // Create Clinic
@@ -86,13 +100,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create Medical Record
-        MedicalRecord::create([
-            'patient_id' => $patientUser->id,
-            'blood_type' => 'O+',
-            'chronic_diseases' => ['Hypertension'],
-            'allergies' => ['Peanuts'],
-            'emergency_contact' => 'Jane Doe: 987-654-3210',
-            'notes' => 'Patient requires regular checkups.',
-        ]);
+        MedicalRecord::firstOrCreate(
+            ['patient_id' => $patientUser->id],
+            [
+                'blood_type' => 'O+',
+                'chronic_diseases' => ['Hypertension'],
+                'allergies' => ['Peanuts'],
+                'emergency_contact' => 'Jane Doe: 987-654-3210',
+                'notes' => 'Patient requires regular checkups.',
+            ]
+        );
     }
 }

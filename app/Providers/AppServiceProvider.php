@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Visit;
 use App\Observers\VisitObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Visit::observe(VisitObserver::class);
+        
+        Gate::define('viewFilament', function ($user) {
+            return $user->hasRole('super_admin');
+        });
     }
 }
