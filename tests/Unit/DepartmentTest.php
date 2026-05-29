@@ -17,31 +17,15 @@ class DepartmentTest extends TestCase
      */
     public function test_can_create_department(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
             'description' => 'Test Description',
         ]);
 
         $this->assertDatabaseHas('departments', [
             'name' => 'Test Department',
-            'clinic_id' => $clinic->id,
         ]);
 
         $this->assertEquals('Test Department', $department->name);
@@ -53,24 +37,9 @@ class DepartmentTest extends TestCase
      */
     public function test_can_update_department(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
         ]);
 
@@ -90,24 +59,9 @@ class DepartmentTest extends TestCase
      */
     public function test_can_delete_department(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
         ]);
 
@@ -120,9 +74,9 @@ class DepartmentTest extends TestCase
     }
 
     /**
-     * اختبار العلاقة مع Clinic
+     * اختبار العلاقة Many-to-Many مع Clinics
      */
-    public function test_department_has_clinic_relationship(): void
+    public function test_department_has_clinics_relationship(): void
     {
         $manager = User::create([
             'name' => 'Manager User',
@@ -141,40 +95,47 @@ class DepartmentTest extends TestCase
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
         ]);
 
-        $this->assertInstanceOf(Clinic::class, $department->clinic);
-        $this->assertEquals($clinic->id, $department->clinic->id);
+        $department->clinics()->attach($clinic->id, [
+            'is_primary' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $department->clinics());
+        $this->assertCount(1, $department->clinics);
+        $this->assertEquals($clinic->id, $department->clinics->first()->id);
     }
 
     /**
-     * اختبار العلاقة مع Doctors
+     * اختبار العلاقة Many-to-Many مع Doctors
      */
     public function test_department_has_doctors_relationship(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $department->doctors());
+        $doctorUser = User::create([
+            'name' => 'Doctor User',
+            'email' => 'doctor@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'doctor',
+        ]);
+
+        $doctor = \App\Models\Doctor::create([
+            'user_id' => $doctorUser->id,
+            'specialization' => 'Cardiologist',
+        ]);
+
+        $department->doctors()->attach($doctor->id, [
+            'is_primary' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $department->doctors());
+        $this->assertCount(1, $department->doctors);
+        $this->assertEquals($doctor->id, $department->doctors->first()->id);
     }
 }

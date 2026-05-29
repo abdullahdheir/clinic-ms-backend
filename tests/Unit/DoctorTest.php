@@ -18,27 +18,6 @@ class DoctorTest extends TestCase
      */
     public function test_can_create_doctor(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
-        $department = Department::create([
-            'name' => 'Test Department',
-            'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
-            'max_capacity' => 20,
-        ]);
-
         $user = User::create([
             'name' => 'Doctor User',
             'email' => 'doctor@example.com',
@@ -48,20 +27,15 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
-            'session_duration_minutes' => 30,
-            'consultation_fee' => 100,
             'bio' => 'Test Bio',
         ]);
 
         $this->assertDatabaseHas('doctors', [
             'user_id' => $user->id,
-            'department_id' => $department->id,
         ]);
 
         $this->assertEquals('Cardiologist', $doctor->specialization);
-        $this->assertEquals(30, $doctor->session_duration_minutes);
     }
 
     /**
@@ -69,27 +43,6 @@ class DoctorTest extends TestCase
      */
     public function test_can_update_doctor(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
-        $department = Department::create([
-            'name' => 'Test Department',
-            'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
-            'max_capacity' => 20,
-        ]);
-
         $user = User::create([
             'name' => 'Doctor User',
             'email' => 'doctor@example.com',
@@ -99,21 +52,17 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
-            'session_duration_minutes' => 30,
-            'consultation_fee' => 100,
+            'bio' => 'Test Bio',
         ]);
 
         $doctor->update([
             'specialization' => 'Neurologist',
-            'session_duration_minutes' => 45,
-            'consultation_fee' => 150,
+            'bio' => 'Updated Bio',
         ]);
 
         $this->assertEquals('Neurologist', $doctor->specialization);
-        $this->assertEquals(45, $doctor->session_duration_minutes);
-        $this->assertEquals(150, $doctor->consultation_fee);
+        $this->assertEquals('Updated Bio', $doctor->bio);
     }
 
     /**
@@ -121,27 +70,6 @@ class DoctorTest extends TestCase
      */
     public function test_can_delete_doctor(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
-        $department = Department::create([
-            'name' => 'Test Department',
-            'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
-            'max_capacity' => 20,
-        ]);
-
         $user = User::create([
             'name' => 'Doctor User',
             'email' => 'doctor@example.com',
@@ -151,7 +79,6 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
         ]);
 
@@ -168,27 +95,6 @@ class DoctorTest extends TestCase
      */
     public function test_doctor_has_user_relationship(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
-        $department = Department::create([
-            'name' => 'Test Department',
-            'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
-            'max_capacity' => 20,
-        ]);
-
         $user = User::create([
             'name' => 'Doctor User',
             'email' => 'doctor@example.com',
@@ -198,7 +104,6 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
         ]);
 
@@ -207,9 +112,9 @@ class DoctorTest extends TestCase
     }
 
     /**
-     * اختبار العلاقة مع Department
+     * اختبار العلاقة Many-to-Many مع Clinics
      */
-    public function test_doctor_has_department_relationship(): void
+    public function test_doctor_has_clinics_relationship(): void
     {
         $manager = User::create([
             'name' => 'Manager User',
@@ -225,10 +130,37 @@ class DoctorTest extends TestCase
             'manager_id' => $manager->id,
         ]);
 
+        $user = User::create([
+            'name' => 'Doctor User',
+            'email' => 'doctor@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'doctor',
+        ]);
+
+        $doctor = Doctor::create([
+            'user_id' => $user->id,
+            'specialization' => 'Cardiologist',
+        ]);
+
+        $doctor->clinics()->attach($clinic->id, [
+            'consultation_fee' => 100,
+            'session_duration_minutes' => 30,
+            'is_active' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $doctor->clinics());
+        $this->assertCount(1, $doctor->clinics);
+        $this->assertEquals($clinic->id, $doctor->clinics->first()->id);
+    }
+
+    /**
+     * اختبار العلاقة Many-to-Many مع Departments
+     */
+    public function test_doctor_has_departments_relationship(): void
+    {
         $department = Department::create([
             'name' => 'Test Department',
             'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
             'max_capacity' => 20,
         ]);
 
@@ -241,12 +173,16 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
         ]);
 
-        $this->assertInstanceOf(Department::class, $doctor->department);
-        $this->assertEquals($department->id, $doctor->department->id);
+        $doctor->departments()->attach($department->id, [
+            'is_primary' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $doctor->departments());
+        $this->assertCount(1, $doctor->departments);
+        $this->assertEquals($department->id, $doctor->departments->first()->id);
     }
 
     /**
@@ -254,27 +190,6 @@ class DoctorTest extends TestCase
      */
     public function test_doctor_has_appointments_relationship(): void
     {
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-        ]);
-
-        $clinic = Clinic::create([
-            'name' => 'Test Clinic',
-            'phone' => '1234567890',
-            'address' => 'Test Address',
-            'manager_id' => $manager->id,
-        ]);
-
-        $department = Department::create([
-            'name' => 'Test Department',
-            'specialty' => 'Cardiology',
-            'clinic_id' => $clinic->id,
-            'max_capacity' => 20,
-        ]);
-
         $user = User::create([
             'name' => 'Doctor User',
             'email' => 'doctor@example.com',
@@ -284,7 +199,6 @@ class DoctorTest extends TestCase
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'department_id' => $department->id,
             'specialization' => 'Cardiologist',
         ]);
 

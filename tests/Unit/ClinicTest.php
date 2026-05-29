@@ -146,7 +146,7 @@ class ClinicTest extends TestCase
     }
 
     /**
-     * اختبار العلاقة مع Departments
+     * اختبار العلاقة Many-to-Many مع Departments
      */
     public function test_clinic_has_departments_relationship(): void
     {
@@ -164,11 +164,23 @@ class ClinicTest extends TestCase
             'manager_id' => $manager->id,
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $clinic->departments());
+        $department = \App\Models\Department::create([
+            'name' => 'Test Department',
+            'specialty' => 'Cardiology',
+            'max_capacity' => 20,
+        ]);
+
+        $clinic->departments()->attach($department->id, [
+            'is_primary' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $clinic->departments());
+        $this->assertCount(1, $clinic->departments);
+        $this->assertEquals($department->id, $clinic->departments->first()->id);
     }
 
     /**
-     * اختبار العلاقة مع Doctors
+     * اختبار العلاقة Many-to-Many مع Doctors
      */
     public function test_clinic_has_doctors_relationship(): void
     {
@@ -186,6 +198,26 @@ class ClinicTest extends TestCase
             'manager_id' => $manager->id,
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $clinic->doctors());
+        $doctorUser = User::create([
+            'name' => 'Doctor User',
+            'email' => 'doctor@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'doctor',
+        ]);
+
+        $doctor = \App\Models\Doctor::create([
+            'user_id' => $doctorUser->id,
+            'specialization' => 'Cardiologist',
+        ]);
+
+        $clinic->doctors()->attach($doctor->id, [
+            'consultation_fee' => 100,
+            'session_duration_minutes' => 30,
+            'is_active' => true,
+        ]);
+
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class, $clinic->doctors());
+        $this->assertCount(1, $clinic->doctors);
+        $this->assertEquals($doctor->id, $clinic->doctors->first()->id);
     }
 }
