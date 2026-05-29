@@ -61,12 +61,12 @@ class DoctorResource extends Resource
                         ->schema([
                             Forms\Components\Select::make('clinic_id')
                                 ->label('العيادة')
-                                ->relationship('clinics', 'name')
+                                ->options(\App\Models\Clinic::all(['id', 'name'])->pluck('name', 'id')->toArray())
                                 ->searchable()
                                 ->required(),
                             Forms\Components\Select::make('department_id')
                                 ->label('القسم في العيادة')
-                                ->relationship('departments', 'name')
+                                ->options(\App\Models\Department::all(['id', 'name'])->pluck('name', 'id')->toArray())
                                 ->searchable(),
                             Forms\Components\TextInput::make('consultation_fee')
                                 ->label('رسوم الاستشارة')
