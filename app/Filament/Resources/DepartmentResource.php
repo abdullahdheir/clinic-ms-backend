@@ -38,11 +38,6 @@ class DepartmentResource extends Resource
                         ->required(),
                     Forms\Components\TextInput::make('specialty')
                         ->label('التخصص'),
-                    Forms\Components\Select::make('clinic_id')
-                        ->label('العيادة')
-                        ->relationship('clinic', 'name')
-                        ->searchable()
-                        ->required(),
                     Forms\Components\TextInput::make('max_capacity')
                         ->label('السعة القصوى')
                         ->numeric()
@@ -51,6 +46,20 @@ class DepartmentResource extends Resource
                         ->label('الوصف')
                         ->columnSpanFull(),
                 ])->columns(2),
+
+                Section::make('العيادات')->schema([
+                    Forms\Components\CheckboxList::make('clinics')
+                        ->label('العيادات')
+                        ->relationship('clinics', 'name')
+                        ->columns(3),
+                ]),
+
+                Section::make('الأطباء')->schema([
+                    Forms\Components\CheckboxList::make('doctors')
+                        ->label('الأطباء')
+                        ->relationship('doctors', 'user.name')
+                        ->columns(3),
+                ]),
             ]);
     }
 
@@ -65,10 +74,6 @@ class DepartmentResource extends Resource
                     ->label('القسم')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('clinic.name')
-                    ->label('العيادة')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('specialty')
                     ->label('التخصص')
                     ->searchable()
@@ -78,16 +83,21 @@ class DepartmentResource extends Resource
                     ->badge()
                     ->color('primary')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('clinics_count')
+                    ->counts('clinics')
+                    ->label('العيادات')
+                    ->badge()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('doctors_count')
                     ->counts('doctors')
                     ->label('الأطباء')
                     ->badge()
-                    ->color('success'),
+                    ->color('info'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('clinic_id')
+                Tables\Filters\SelectFilter::make('clinic')
                     ->label('العيادة')
-                    ->relationship('clinic', 'name'),
+                    ->relationship('clinics', 'name'),
             ])
             ->recordActions([
                 EditAction::make()->label('تعديل'),

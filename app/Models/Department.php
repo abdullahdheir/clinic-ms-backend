@@ -5,21 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['clinic_id', 'name', 'specialty', 'max_capacity', 'description'])]
+#[Fillable(['name', 'specialty', 'max_capacity', 'description'])]
 class Department extends Model
 {
     use HasFactory;
 
-    public function clinic(): BelongsTo
+    public function clinics(): BelongsToMany
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsToMany(Clinic::class, 'clinic_department')
+            ->withPivot('is_primary')
+            ->withTimestamps();
     }
 
-    public function doctors(): HasMany
+    public function doctors(): BelongsToMany
     {
-        return $this->hasMany(Doctor::class);
+        return $this->belongsToMany(Doctor::class, 'doctor_department')
+            ->withPivot('is_primary')
+            ->withTimestamps();
     }
 }

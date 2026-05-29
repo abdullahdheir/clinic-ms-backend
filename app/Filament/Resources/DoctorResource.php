@@ -39,25 +39,55 @@ class DoctorResource extends Resource
                         ->relationship('user', 'name')
                         ->searchable()
                         ->required(),
-                    Forms\Components\Select::make('department_id')
-                        ->label('القسم')
-                        ->relationship('department', 'name')
-                        ->searchable(),
                     Forms\Components\TextInput::make('specialization')
                         ->label('التخصص')
                         ->required(),
-                    Forms\Components\TextInput::make('session_duration_minutes')
-                        ->label('مدة الجلسة (دقيقة)')
-                        ->numeric()
-                        ->default(30),
-                    Forms\Components\TextInput::make('consultation_fee')
-                        ->label('رسورة الاستشارة')
-                        ->numeric()
-                        ->prefix('$'),
                     Forms\Components\Textarea::make('bio')
                         ->label('السيرة الذاتية')
                         ->columnSpanFull(),
                 ])->columns(2),
+
+                Section::make('الأقسام')->schema([
+                    Forms\Components\CheckboxList::make('departments')
+                        ->label('الأقسام')
+                        ->relationship('departments', 'name')
+                        ->columns(3),
+                ]),
+
+                Section::make('العيادات')->schema([
+                    Forms\Components\Repeater::make('clinics')
+                        ->label('العيادات')
+                        ->relationship('clinics')
+                        ->schema([
+                            Forms\Components\Select::make('clinic_id')
+                                ->label('العيادة')
+                                ->relationship('clinics', 'name')
+                                ->searchable()
+                                ->required(),
+                            Forms\Components\Select::make('department_id')
+                                ->label('القسم في العيادة')
+                                ->relationship('departments', 'name')
+                                ->searchable(),
+                            Forms\Components\TextInput::make('consultation_fee')
+                                ->label('رسوم الاستشارة')
+                                ->numeric()
+                                ->prefix('$')
+                                ->default(0),
+                            Forms\Components\TextInput::make('session_duration_minutes')
+                                ->label('مدة الجلسة (دقيقة)')
+                                ->numeric()
+                                ->default(30),
+                            Forms\Components\Toggle::make('is_active')
+                                ->label('نشط')
+                                ->default(true),
+                            Forms\Components\KeyValue::make('working_hours')
+                                ->label('ساعات العمل')
+                                ->keyLabel('اليوم')
+                                ->valueLabel('الأوقات'),
+                        ])
+                        ->columns(2)
+                        ->columnSpanFull(),
+                ]),
             ]);
     }
 
@@ -76,28 +106,34 @@ class DoctorResource extends Resource
                     ->label('التخصص')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('department.name')
-                    ->label('القسم')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('session_duration_minutes')
-                    ->label('مدة الجلسة')
-                    ->suffix(' دقيقة')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('consultation_fee')
-                    ->label('رسوم الاستشارة')
-                    ->money('USD')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('clinics_count')
+                    ->counts('clinics')
+                    ->label('العيادات')
+                    ->badge()
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('departments_count')
+                    ->counts('departments')
+                    ->label('الأقسام')
+                    ->badge()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('appointments_count')
                     ->counts('appointments')
                     ->label('المواعيد')
                     ->badge()
-                    ->color('primary'),
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('prescriptions_count')
+                    ->counts('prescriptions')
+                    ->label('الوصفات')
+                    ->badge()
+                    ->color('warning'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('department_id')
+                Tables\Filters\SelectFilter::make('clinic')
+                    ->label('العيادة')
+                    ->relationship('clinics', 'name'),
+                Tables\Filters\SelectFilter::make('department')
                     ->label('القسم')
-                    ->relationship('department', 'name'),
+                    ->relationship('departments', 'name'),
             ])
             ->recordActions([
                 EditAction::make()->label('تعديل'),

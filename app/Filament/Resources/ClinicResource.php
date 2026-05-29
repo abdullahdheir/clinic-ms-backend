@@ -68,6 +68,20 @@ class ClinicResource extends Resource
                         ->imageCropAspectRatio('1:1')
                         ->columnSpanFull(),
                 ]),
+
+                Section::make('الأقسام')->schema([
+                    Forms\Components\CheckboxList::make('departments')
+                        ->label('الأقسام')
+                        ->relationship('departments', 'name')
+                        ->columns(3),
+                ]),
+
+                Section::make('الأطباء')->schema([
+                    Forms\Components\CheckboxList::make('doctors')
+                        ->label('الأطباء')
+                        ->relationship('doctors', 'user.name')
+                        ->columns(3),
+                ]),
             ]);
     }
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['patient_id', 'doctor_id', 'clinic_id', 'department_id', 'scheduled_at', 'status', 'reason', 'notes', 'checked_in_at', 'checked_in_by'])]
+#[Fillable(['patient_id', 'doctor_id', 'clinic_id', 'scheduled_at', 'status', 'reason', 'notes', 'checked_in_at', 'checked_in_by'])]
 class Appointment extends Model
 {
     use HasFactory;
@@ -28,11 +28,6 @@ class Appointment extends Model
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class);
     }
 
     public function checkedInBy(): BelongsTo
