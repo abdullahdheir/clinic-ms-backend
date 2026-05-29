@@ -25,7 +25,7 @@ class MedicalFileRepository extends BaseRepository
      */
     public function allWithRelations(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->with(['patient', 'visit'])->get();
+        return $this->model->with(['patient.user', 'visit'])->get();
     }
 
     /**
@@ -36,7 +36,7 @@ class MedicalFileRepository extends BaseRepository
      */
     public function findWithRelations(int|string $id): ?MedicalFile
     {
-        return $this->model->with(['patient', 'visit'])->find($id);
+        return $this->model->with(['patient.user', 'visit'])->find($id);
     }
 
     /**
@@ -47,7 +47,7 @@ class MedicalFileRepository extends BaseRepository
      */
     public function findWithRelationsOrFail(int|string $id): MedicalFile
     {
-        return $this->model->with(['patient', 'visit'])->findOrFail($id);
+        return $this->model->with(['patient.user', 'visit'])->findOrFail($id);
     }
 
     /**
@@ -59,11 +59,11 @@ class MedicalFileRepository extends BaseRepository
     public function deleteWithFile(int|string $id): bool
     {
         $model = $this->findOrFail($id);
-        
+
         if (Storage::disk('public')->exists($model->file_path)) {
             Storage::disk('public')->delete($model->file_path);
         }
-        
+
         return $model->delete();
     }
 }

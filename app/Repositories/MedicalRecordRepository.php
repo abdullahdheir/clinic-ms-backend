@@ -24,7 +24,7 @@ class MedicalRecordRepository extends BaseRepository
      */
     public function allWithRelations(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->with(['patient', 'doctor.user'])->get();
+        return $this->model->with(['patient.user', 'doctor.user'])->get();
     }
 
     /**
@@ -35,7 +35,7 @@ class MedicalRecordRepository extends BaseRepository
      */
     public function findWithRelations(int|string $id): ?MedicalRecord
     {
-        return $this->model->with(['patient', 'doctor.user'])->find($id);
+        return $this->model->with(['patient.user', 'doctor.user'])->find($id);
     }
 
     /**
@@ -46,19 +46,19 @@ class MedicalRecordRepository extends BaseRepository
      */
     public function findWithRelationsOrFail(int|string $id): MedicalRecord
     {
-        return $this->model->with(['patient', 'doctor.user'])->findOrFail($id);
+        return $this->model->with(['patient.user', 'doctor.user'])->findOrFail($id);
     }
 
     /**
      * Find medical record by patient ID.
-     * 
+     *
      * @param int|string $patientId The patient ID.
      * @return MedicalRecord
      */
     public function findByPatientId(int|string $patientId): MedicalRecord
     {
         return $this->model->where('patient_id', $patientId)
-            ->with(['patient', 'visits.doctor.user'])
+            ->with(['patient.user', 'visits.doctor.user'])
             ->firstOrFail();
     }
 }

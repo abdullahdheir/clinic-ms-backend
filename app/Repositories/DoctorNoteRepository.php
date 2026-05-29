@@ -49,7 +49,7 @@ class DoctorNoteRepository extends BaseRepository
     public function findWithRelations(int $id): ?DoctorNote
     {
         return $this->model
-            ->with(['doctor.user', 'patient'])
+            ->with(['doctor.user', 'patient.user'])
             ->find($id);
     }
 

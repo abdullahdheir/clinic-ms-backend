@@ -35,7 +35,7 @@ class CalendarEventRepository extends BaseRepository
         ?int $clinicId = null
     ): Collection {
         $query = $this->model
-            ->with(['doctor.user', 'appointment.patient'])
+            ->with(['doctor.user', 'appointment.patient.user'])
             ->whereBetween('start_time', [$start, $end]);
 
         if ($doctorId) {
@@ -58,7 +58,7 @@ class CalendarEventRepository extends BaseRepository
     public function findWithRelations(int $id): ?CalendarEvent
     {
         return $this->model
-            ->with(['doctor.user', 'appointment.patient'])
+            ->with(['doctor.user', 'appointment.patient.user'])
             ->find($id);
     }
 
@@ -74,7 +74,7 @@ class CalendarEventRepository extends BaseRepository
         $startDate = Carbon::parse($start);
         $endDate = Carbon::parse($end);
 
-        return Appointment::with(['patient', 'doctor.user'])
+        return Appointment::with(['patient.user', 'doctor.user'])
             ->whereBetween('scheduled_at', [$startDate, $endDate])
             ->get();
     }

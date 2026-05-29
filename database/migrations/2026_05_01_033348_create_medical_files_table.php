@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('medical_files', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             $table->foreignId('visit_id')->nullable()->constrained('visits')->onDelete('set null');
             $table->string('file_name');
             $table->string('file_path');

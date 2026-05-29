@@ -32,7 +32,7 @@ class AppointmentResource extends Resource
             Section::make('تفاصيل الموعد')->schema([
                 Forms\Components\Select::make('patient_id')
                     ->label('المريض')
-                    ->relationship('patient', 'name')
+                    ->relationship('patient.user', 'name')
                     ->searchable()
                     ->required(),
                 Forms\Components\Select::make('doctor_id')

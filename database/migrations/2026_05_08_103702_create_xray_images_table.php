@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('xray_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             $table->foreignId('doctor_id')->nullable()->constrained('doctors')->onDelete('set null');
             $table->foreignId('visit_id')->nullable()->constrained('visits')->onDelete('cascade');
             $table->string('title');

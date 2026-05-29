@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Filament\Actions\Action;
+use Filament\Enums\GlobalSearchPosition;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -44,8 +45,8 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->font('Tajawal', provider: \Filament\FontProviders\GoogleFontProvider::class)
             ->darkMode(false)
-            ->sidebarCollapsibleOnDesktop()
-            ->globalSearch()
+            ->sidebarCollapsibleOnDesktop(false)
+            ->globalSearch(position: GlobalSearchPosition::Topbar)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')

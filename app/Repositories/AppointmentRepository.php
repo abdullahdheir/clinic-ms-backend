@@ -24,7 +24,7 @@ class AppointmentRepository extends BaseRepository
      */
     public function allWithRelations(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->with(['patient', 'doctor.user', 'department'])->get();
+        return $this->model->with(['patient.user', 'doctor.user', 'department'])->get();
     }
 
     /**
@@ -35,7 +35,7 @@ class AppointmentRepository extends BaseRepository
      */
     public function findWithRelations(int|string $id): ?Appointment
     {
-        return $this->model->with(['patient', 'doctor.user', 'department', 'checkedInBy'])->find($id);
+        return $this->model->with(['patient.user', 'doctor.user', 'department', 'checkedInBy'])->find($id);
     }
 
     /**
@@ -46,24 +46,24 @@ class AppointmentRepository extends BaseRepository
      */
     public function findWithRelationsOrFail(int|string $id): Appointment
     {
-        return $this->model->with(['patient', 'doctor.user', 'department', 'checkedInBy'])->findOrFail($id);
+        return $this->model->with(['patient.user', 'doctor.user', 'department', 'checkedInBy'])->findOrFail($id);
     }
 
     /**
      * Get appointments scheduled for today.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getTodayAppointments(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->model->whereDate('scheduled_at', now()->toDateString())
-            ->with(['patient', 'doctor.user', 'department'])
+            ->with(['patient.user', 'doctor.user', 'department'])
             ->get();
     }
 
     /**
      * Update appointment status.
-     * 
+     *
      * @param int|string $id The appointment ID.
      * @param string $status The new status.
      * @return Appointment

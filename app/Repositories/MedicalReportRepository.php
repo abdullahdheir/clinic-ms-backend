@@ -48,7 +48,7 @@ class MedicalReportRepository extends BaseRepository
     public function findWithRelations(int $id): ?MedicalReport
     {
         return $this->model
-            ->with(['doctor.user', 'patient', 'visit'])
+            ->with(['doctor.user', 'patient.user', 'visit'])
             ->find($id);
     }
 
