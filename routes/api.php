@@ -38,6 +38,51 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('doctor-shifts', DoctorShiftController::class);
     Route::apiResource('patients', PatientController::class);
 
+    // Clinic Manager specific endpoints
+    Route::middleware('role:manager')->prefix('manager')->group(function () {
+        Route::get('stats', [ClinicController::class, 'stats']);
+        Route::get('clinics/{clinic}/doctors', [ClinicController::class, 'doctors']);
+        Route::get('clinics/{clinic}/departments', [ClinicController::class, 'departments']);
+        Route::get('clinics/{clinic}/appointments', [ClinicController::class, 'appointments']);
+        Route::get('clinics/{clinic}/patients', [ClinicController::class, 'patients']);
+        Route::post('clinics/{clinic}/doctors/{doctor}', [ClinicController::class, 'attachDoctor']);
+        Route::delete('clinics/{clinic}/doctors/{doctor}', [ClinicController::class, 'detachDoctor']);
+        Route::post('clinics/{clinic}/departments/{department}', [ClinicController::class, 'attachDepartment']);
+        Route::delete('clinics/{clinic}/departments/{department}', [ClinicController::class, 'detachDepartment']);
+    });
+
+    // Doctor specific endpoints
+    Route::middleware('role:doctor')->prefix('doctor')->group(function () {
+        Route::get('stats', [DoctorController::class, 'stats']);
+        Route::get('appointments', [DoctorController::class, 'appointments']);
+        Route::get('patients', [DoctorController::class, 'patients']);
+        Route::get('clinics', [DoctorController::class, 'clinics']);
+        Route::get('departments', [DoctorController::class, 'departments']);
+        Route::post('appointments/{appointment}/complete', [DoctorController::class, 'completeAppointment']);
+        Route::post('prescriptions', [PrescriptionController::class, 'store']);
+        Route::post('medical-reports', [MedicalReportController::class, 'store']);
+        Route::post('doctor-notes', [DoctorNoteController::class, 'store']);
+    });
+
+    // Receptionist specific endpoints
+    Route::middleware('role:receptionist')->prefix('receptionist')->group(function () {
+        Route::get('stats', [AppointmentController::class, 'receptionistStats']);
+        Route::get('appointments', [AppointmentController::class, 'receptionistAppointments']);
+        Route::post('appointments/{appointment}/check-in', [AppointmentController::class, 'checkIn']);
+        Route::post('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm']);
+        Route::get('patients', [PatientController::class, 'index']);
+    });
+
+    // Patient specific endpoints
+    Route::middleware('role:patient')->prefix('patient')->group(function () {
+        Route::get('stats', [PatientController::class, 'stats']);
+        Route::get('appointments', [AppointmentController::class, 'patientAppointments']);
+        Route::post('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel']);
+        Route::get('medical-records', [MedicalRecordController::class, 'patientRecords']);
+        Route::get('prescriptions', [PrescriptionController::class, 'patientPrescriptions']);
+        Route::get('medical-reports', [MedicalReportController::class, 'patientReports']);
+    });
+
     Route::get('appointments/available-slots', [AppointmentController::class, 'availableSlots']);
     Route::get('appointments/today', [AppointmentController::class, 'today']);
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
@@ -47,17 +92,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('visits/{visit}/files', [VisitController::class, 'uploadFiles']);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('medical-files', MedicalFileController::class);
-    
+
     Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'markAsPaid']);
     Route::apiResource('invoices', InvoiceController::class);
-    
+
     // Notification routes (require authentication)
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::get('notifications/latest', [NotificationController::class, 'latest']);
     Route::apiResource('notifications', NotificationController::class);
-    
+
     // Reports routes
     Route::get('reports/dashboard', [ReportController::class, 'dashboard']);
     Route::get('reports/appointments', [ReportController::class, 'appointments']);
