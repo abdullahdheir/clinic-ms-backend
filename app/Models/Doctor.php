@@ -35,4 +35,29 @@ class Doctor extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
+    public function medicalReports(): HasMany
+    {
+        return $this->hasMany(MedicalReport::class);
+    }
+
+    public function xrayImages(): HasMany
+    {
+        return $this->hasMany(XrayImage::class);
+    }
+
+    public function doctorNotes(): HasMany
+    {
+        return $this->hasMany(DoctorNote::class);
+    }
+
+    public function calendarEvents(): HasMany
+    {
+        return $this->hasMany(CalendarEvent::class);
+    }
 }

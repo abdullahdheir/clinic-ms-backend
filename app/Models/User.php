@@ -66,6 +66,26 @@ class User extends Authenticatable
         return $this->hasMany(Invoice::class, 'patient_id');
     }
 
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class, 'patient_id');
+    }
+
+    public function medicalReports(): HasMany
+    {
+        return $this->hasMany(MedicalReport::class, 'patient_id');
+    }
+
+    public function xrayImages(): HasMany
+    {
+        return $this->hasMany(XrayImage::class, 'patient_id');
+    }
+
+    public function doctorNotes(): HasMany
+    {
+        return $this->hasMany(DoctorNote::class, 'patient_id');
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin');

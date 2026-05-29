@@ -22,8 +22,11 @@ class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static ?string $navigationLabel  = 'الأقسام';
-    protected static ?int $navigationSort      = 3;
+    protected static ?string $navigationLabel = 'الأقسام';
+    protected static ?string $modelLabel = 'قسم';
+    protected static ?string $pluralModelLabel = 'الأقسام';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-group';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $form): Schema
     {
@@ -37,7 +40,7 @@ class DepartmentResource extends Resource
                         ->label('التخصص'),
                     Forms\Components\Select::make('clinic_id')
                         ->label('العيادة')
-                        ->relationship('clinic','name')
+                        ->relationship('clinic', 'name')
                         ->searchable()
                         ->required(),
                     Forms\Components\TextInput::make('max_capacity')
@@ -55,18 +58,26 @@ class DepartmentResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('#')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('القسم')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('clinic.name')
-                    ->label('العيادة'),
+                    ->label('العيادة')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('specialty')
-                    ->label('التخصص'),
+                    ->label('التخصص')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('max_capacity')
                     ->label('السعة القصوى')
                     ->badge()
-                    ->color('primary'),
+                    ->color('primary')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('doctors_count')
                     ->counts('doctors')
                     ->label('الأطباء')
@@ -76,7 +87,7 @@ class DepartmentResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('clinic_id')
                     ->label('العيادة')
-                    ->relationship('clinic','name'),
+                    ->relationship('clinic', 'name'),
             ])
             ->recordActions([
                 EditAction::make()->label('تعديل'),

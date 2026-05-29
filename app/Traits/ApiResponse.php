@@ -66,4 +66,27 @@ trait ApiResponse
     {
         return response()->json(null, 204);
     }
+
+    /**
+     * Return validation error response
+     *
+     * @param mixed $errors - Validation errors
+     * @param string $message - Error message
+     * @return JsonResponse
+     */
+    protected function validationErrorResponse(mixed $errors, string $message = 'Validation failed'): JsonResponse
+    {
+        return $this->errorResponse($message, 422, $errors);
+    }
+
+    /**
+     * Return not found response
+     *
+     * @param string $resource - Resource name
+     * @return JsonResponse
+     */
+    protected function notFoundResponse(string $resource = 'Resource'): JsonResponse
+    {
+        return $this->errorResponse($resource . ' not found', 404);
+    }
 }

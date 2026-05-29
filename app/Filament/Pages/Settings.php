@@ -16,6 +16,8 @@ class Settings extends Page
 {
     protected static ?string $navigationLabel = 'الإعدادات';
     protected static ?string $title           = 'إعدادات النظام';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static ?int $navigationSort      = 7;
 
     protected string $view = 'filament.pages.settings';
 

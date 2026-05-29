@@ -23,8 +23,11 @@ class DoctorResource extends Resource
 {
     protected static ?string $model = Doctor::class;
 
-    protected static ?string $navigationLabel  = 'الأطباء';
-    protected static ?int $navigationSort      = 2;
+    protected static ?string $navigationLabel = 'الأطباء';
+    protected static ?string $modelLabel = 'طبيب';
+    protected static ?string $pluralModelLabel = 'الأطباء';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $form): Schema
     {
@@ -33,12 +36,12 @@ class DoctorResource extends Resource
                 Section::make('معلومات الطبيب')->schema([
                     Forms\Components\Select::make('user_id')
                         ->label('المستخدم')
-                        ->relationship('user','name')
+                        ->relationship('user', 'name')
                         ->searchable()
                         ->required(),
                     Forms\Components\Select::make('department_id')
                         ->label('القسم')
-                        ->relationship('department','name')
+                        ->relationship('department', 'name')
                         ->searchable(),
                     Forms\Components\TextInput::make('specialization')
                         ->label('التخصص')
@@ -62,20 +65,29 @@ class DoctorResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('#')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('الطبيب')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('specialization')
-                    ->label('التخصص'),
+                    ->label('التخصص')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->label('القسم'),
+                    ->label('القسم')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('session_duration_minutes')
                     ->label('مدة الجلسة')
-                    ->suffix(' دقيقة'),
+                    ->suffix(' دقيقة')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('consultation_fee')
-                    ->label('رسورة الاستشارة')
-                    ->money('USD'),
+                    ->label('رسوم الاستشارة')
+                    ->money('USD')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('appointments_count')
                     ->counts('appointments')
                     ->label('المواعيد')
@@ -85,7 +97,7 @@ class DoctorResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('department_id')
                     ->label('القسم')
-                    ->relationship('department','name'),
+                    ->relationship('department', 'name'),
             ])
             ->recordActions([
                 EditAction::make()->label('تعديل'),

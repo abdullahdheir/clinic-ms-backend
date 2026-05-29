@@ -21,6 +21,8 @@ class Reports extends Page
 {
     protected static ?string $navigationLabel = 'التقارير';
     protected static ?string $title           = 'التقارير والإحصائيات';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static ?int $navigationSort      = 6;
 
     protected string $view = 'filament.pages.reports';
 

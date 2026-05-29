@@ -23,9 +23,10 @@ class ClinicResource extends Resource
 {
     protected static ?string $model = Clinic::class;
 
-    protected static ?string $navigationLabel   = 'الأقسام';
+    protected static ?string $navigationLabel   = 'العيادات';
     protected static ?string $modelLabel        = 'عيادة';
     protected static ?string $pluralModelLabel  = 'العيادات';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?int $navigationSort       = 1;
 
     public static function form(Schema $form): Schema
@@ -74,15 +75,20 @@ class ClinicResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('#')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('العيادة')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('manager.name')
                     ->label('المدير')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('phone')
-                    ->label('الهاتف'),
+                    ->label('الهاتف')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('departments_count')
                     ->counts('departments')
                     ->label('الأقسام')
@@ -99,7 +105,8 @@ class ClinicResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')

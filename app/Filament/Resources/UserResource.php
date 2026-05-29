@@ -24,7 +24,8 @@ class UserResource extends Resource
     protected static ?string $navigationLabel  = 'المستخدمون';
     protected static ?string $modelLabel       = 'مستخدم';
     protected static ?string $pluralModelLabel = 'المستخدمون';
-    protected static ?int $navigationSort      = 1;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static ?int $navigationSort      = 5;
 
     public static function form(Schema $form): Schema
     {
@@ -47,12 +48,21 @@ class UserResource extends Resource
                         ->required(fn(string $context) => $context === 'create'),
                     Forms\Components\TextInput::make('phone')
                         ->label('رقم الهاتف'),
+                    Forms\Components\TextInput::make('national_id')
+                        ->label('رقم الهوية الوطنية'),
+                    Forms\Components\DatePicker::make('date_of_birth')
+                        ->label('تاريخ الميلاد'),
+                    Forms\Components\Select::make('gender')
+                        ->label('الجنس')
+                        ->options([
+                            'male' => 'ذكر',
+                            'female' => 'أنثى',
+                        ]),
                 ])->columns(2),
 
                 Section::make('الصلاحيات')->schema([
-                    Forms\Components\Select::make('roles')
+                    Forms\Components\Select::make('role')
                         ->label('الدور')
-                        ->relationship('roles','name')
                         ->options([
                             'super_admin'  => 'مسؤول النظام',
                             'manager'      => 'مدير عيادة',
@@ -60,8 +70,7 @@ class UserResource extends Resource
                             'receptionist' => 'موظف استقبال',
                             'patient'      => 'مريض',
                         ])
-                        ->multiple()
-                        ->preloaded()
+                        ->native(false)
                         ->required(),
                 ]),
             ]);
@@ -71,6 +80,9 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('#')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
                     ->searchable()
@@ -78,10 +90,10 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->label('البريد')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('roles.name')
+                Tables\Columns\TextColumn::make('role')
                     ->label('الدور')
                     ->badge()
-                    ->formatStateUsing(fn($state) => match($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'super_admin'  => 'مسؤول النظام',
                         'manager'      => 'مدير عيادة',
                         'doctor'       => 'طبيب',
@@ -89,7 +101,7 @@ class UserResource extends Resource
                         'patient'      => 'مريض',
                         default        => $state,
                     })
-                    ->color(fn($state) => match($state) {
+                    ->color(fn($state) => match ($state) {
                         'super_admin'  => 'danger',
                         'manager'      => 'warning',
                         'doctor'       => 'success',
@@ -98,16 +110,42 @@ class UserResource extends Resource
                         default        => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('phone')
-                    ->label('الهاتف'),
+                    ->label('الهاتف')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('national_id')
+                    ->label('رقم الهوية')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('الجنس')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'male' => 'ذكر',
+                        'female' => 'أنثى',
+                        default => $state,
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('roles')
+                Tables\Filters\SelectFilter::make('role')
                     ->label('الدور')
-                    ->relationship('roles','name'),
+                    ->options([
+                        'super_admin'  => 'مسؤول النظام',
+                        'manager'      => 'مدير عيادة',
+                        'doctor'       => 'طبيب',
+                        'receptionist' => 'استقبال',
+                        'patient'      => 'مريض',
+                    ]),
+                Tables\Filters\SelectFilter::make('gender')
+                    ->label('الجنس')
+                    ->options([
+                        'male' => 'ذكر',
+                        'female' => 'أنثى',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make()->label('تعديل'),

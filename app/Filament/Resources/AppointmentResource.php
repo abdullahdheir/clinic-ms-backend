@@ -23,7 +23,8 @@ class AppointmentResource extends Resource
     protected static ?string $navigationLabel  = 'المواعيد';
     protected static ?string $modelLabel       = 'موعد';
     protected static ?string $pluralModelLabel = 'المواعيد';
-    protected static ?int $navigationSort      = 2;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
+    protected static ?int $navigationSort      = 4;
 
     public static function form(Schema $form): Schema
     {
@@ -69,14 +70,21 @@ class AppointmentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-
+            Tables\Columns\TextColumn::make('id')
+                ->label('#')
+                ->sortable(),
             Tables\Columns\TextColumn::make('patient.name')
                 ->label('المريض')
-                ->searchable(),
+                ->searchable()
+                ->sortable(),
             Tables\Columns\TextColumn::make('doctor.user.name')
-                ->label('الطبيب'),
+                ->label('الطبيب')
+                ->searchable()
+                ->sortable(),
             Tables\Columns\TextColumn::make('clinic.name')
-                ->label('العيادة'),
+                ->label('العيادة')
+                ->searchable()
+                ->sortable(),
             Tables\Columns\TextColumn::make('scheduled_at')
                 ->label('الموعد')
                 ->dateTime('d/m/Y H:i')

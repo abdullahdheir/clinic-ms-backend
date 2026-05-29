@@ -11,8 +11,13 @@ use App\Http\Controllers\MedicalFileController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\DoctorNoteController;
+use App\Http\Controllers\MedicalReportController;
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VisitController;
+use App\Http\Controllers\XrayController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -59,4 +64,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('reports/revenue', [ReportController::class, 'revenue']);
     Route::get('reports/patients', [ReportController::class, 'patients']);
     Route::get('reports/doctors', [ReportController::class, 'doctors']);
+
+    // Coming Soon Features - NOW IMPLEMENTED ✅
+
+    // Prescriptions routes (الوصفات الطبية)
+    Route::get('prescriptions/types', [PrescriptionController::class, 'types']);
+    Route::get('prescriptions/{id}/print', [PrescriptionController::class, 'print']);
+    Route::apiResource('prescriptions', PrescriptionController::class);
+
+    // Medical Reports routes (التقارير الطبية)
+    Route::get('medical-reports/types', [MedicalReportController::class, 'reportTypes']);
+    Route::get('medical-reports/{id}/download', [MedicalReportController::class, 'download']);
+    Route::apiResource('medical-reports', MedicalReportController::class);
+
+    // X-ray Images routes (صور الأشعة)
+    Route::get('xray-images/types', [XrayController::class, 'imageTypes']);
+    Route::get('xray-images/compare/{id1}/{id2}', [XrayController::class, 'compare']);
+    Route::apiResource('xray-images', XrayController::class);
+
+    // Doctor Notes routes (ملاحظات الطبيب)
+    Route::post('doctor-notes/{id}/toggle-pin', [DoctorNoteController::class, 'togglePin']);
+    Route::apiResource('doctor-notes', DoctorNoteController::class);
+
+    // Calendar routes (التقويم)
+    Route::get('calendar/appointments', [CalendarController::class, 'appointments']);
+    Route::patch('calendar/appointments/{id}/time', [CalendarController::class, 'updateAppointmentTime']);
+    Route::apiResource('calendar', CalendarController::class);
 });
