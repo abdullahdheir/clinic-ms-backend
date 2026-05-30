@@ -39,6 +39,27 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(Clinic::class, 'manager_id');
     }
 
+    public function clinic(): HasOne
+    {
+        return $this->hasOne(Clinic::class, 'manager_id');
+    }
+
+    public function getClinicIdAttribute(): ?int
+    {
+        if ($this->isManager()) {
+            return $this->managedClinic?->id;
+        }
+        if ($this->isDoctor()) {
+            return $this->doctor?->clinics?->first()?->id;
+        }
+        if ($this->isReceptionist()) {
+            // Receptionist can be associated with a clinic through a relationship
+            // For now, return the first clinic or null
+            return Clinic::first()?->id;
+        }
+        return null;
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'patient_id');
