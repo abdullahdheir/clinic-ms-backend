@@ -80,10 +80,37 @@ class DoctorResource extends Resource
                             Forms\Components\Toggle::make('is_active')
                                 ->label('نشط')
                                 ->default(true),
-                            Forms\Components\KeyValue::make('working_hours')
+                            Forms\Components\Repeater::make('working_hours')
                                 ->label('ساعات العمل')
-                                ->keyLabel('اليوم')
-                                ->valueLabel('الأوقات'),
+                                ->schema([
+                                    Forms\Components\Select::make('day')
+                                        ->label('اليوم')
+                                        ->options([
+                                            'saturday' => 'السبت',
+                                            'sunday' => 'الأحد',
+                                            'monday' => 'الاثنين',
+                                            'tuesday' => 'الثلاثاء',
+                                            'wednesday' => 'الأربعاء',
+                                            'thursday' => 'الخميس',
+                                            'friday' => 'الجمعة',
+                                        ])
+                                        ->required()
+                                        ->searchable(),
+                                    Forms\Components\TimePicker::make('start_time')
+                                        ->label('وقت البداية')
+                                        ->seconds(false)
+                                        ->required(),
+                                    Forms\Components\TimePicker::make('end_time')
+                                        ->label('وقت النهاية')
+                                        ->seconds(false)
+                                        ->required(),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('نشط')
+                                        ->default(true),
+                                ])
+                                ->columns(4)
+                                ->columnSpanFull()
+                                ->itemLabel(fn(array $state): ?string => $state['day'] ?? null),
                         ])
                         ->columns(2)
                         ->columnSpanFull(),
