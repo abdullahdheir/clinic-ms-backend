@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('profile', [AuthController::class, 'updateProfile']);
     });
 
-    Route::apiResource('clinics', ClinicController::class)->middleware('role:manager|super_admin');
+    Route::apiResource('clinics', ClinicController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('doctors', DoctorController::class);
     Route::apiResource('doctor-shifts', DoctorShiftController::class);
