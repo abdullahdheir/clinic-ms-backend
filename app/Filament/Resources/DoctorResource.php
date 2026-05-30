@@ -63,7 +63,8 @@ class DoctorResource extends Resource
                                 ->label('العيادة')
                                 ->options(\App\Models\Clinic::all(['id', 'name'])->pluck('name', 'id')->toArray())
                                 ->searchable()
-                                ->required(),
+                                ->required()
+                                ->live(),
                             Forms\Components\Select::make('department_id')
                                 ->label('القسم في العيادة')
                                 ->options(\App\Models\Department::all(['id', 'name'])->pluck('name', 'id')->toArray())
@@ -80,10 +81,10 @@ class DoctorResource extends Resource
                             Forms\Components\Toggle::make('is_active')
                                 ->label('نشط')
                                 ->default(true),
-                            Forms\Components\Repeater::make('working_hours')
+                            Forms\Components\Repeater::make('shifts')
                                 ->label('ساعات العمل')
                                 ->schema([
-                                    Forms\Components\Select::make('day')
+                                    Forms\Components\Select::make('day_of_week')
                                         ->label('اليوم')
                                         ->options([
                                             'saturday' => 'السبت',
@@ -110,7 +111,7 @@ class DoctorResource extends Resource
                                 ])
                                 ->columns(4)
                                 ->columnSpanFull()
-                                ->itemLabel(fn(array $state): ?string => $state['day'] ?? null),
+                                ->itemLabel(fn(array $state): ?string => $state['day_of_week'] ?? null),
                         ])
                         ->columns(2)
                         ->columnSpanFull(),

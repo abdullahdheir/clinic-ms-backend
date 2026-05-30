@@ -45,6 +45,11 @@ class Doctor extends Model
         return $this->hasMany(DoctorShift::class);
     }
 
+    public function clinicShifts($clinicId): HasMany
+    {
+        return $this->shifts()->where('clinic_id', $clinicId);
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);

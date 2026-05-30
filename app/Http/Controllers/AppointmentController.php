@@ -108,9 +108,11 @@ class AppointmentController extends Controller
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'date' => 'required|date',
+            'clinic_id' => 'nullable|exists:clinics,id',
         ]);
 
         $doctorId = $request->doctor_id;
+        $clinicId = $request->clinic_id;
         $date = Carbon::parse($request->date);
 
         $dayOfWeekInt = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
@@ -127,31 +129,25 @@ class AppointmentController extends Controller
 
         $doctor = Doctor::with('clinics')->findOrFail($doctorId);
 
-        // Get working hours from doctor_clinic pivot table
-        $workingHours = null;
-        $sessionDuration = $doctor->session_duration_minutes ?? 30;
-        foreach ($doctor->clinics as $clinic) {
-            $pivot = $clinic->pivot;
-            if ($pivot->working_hours) {
-                $hours = json_decode($pivot->working_hours, true);
-                if (is_array($hours)) {
-                    foreach ($hours as $hour) {
-                        if (isset($hour['day']) && $hour['day'] === $dayOfWeek && isset($hour['is_active']) && $hour['is_active']) {
-                            $workingHours = $hour;
-                            $sessionDuration = $pivot->session_duration_minutes ?? $doctor->session_duration_minutes ?? 30;
-                            break 2;
-                        }
-                    }
-                }
-            }
+        // Get working hours from DoctorShift with clinic_id
+        $query = DoctorShift::where('doctor_id', $doctorId)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true);
+
+        if ($clinicId) {
+            $query->where('clinic_id', $clinicId);
         }
 
-        if (!$workingHours) {
+        $shift = $query->first();
+
+        if (!$shift) {
             return $this->successResponse([]);
         }
 
-        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $workingHours['start_time']);
-        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $workingHours['end_time']);
+        $sessionDuration = $doctor->session_duration_minutes ?? 30;
+
+        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->start_time);
+        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->end_time);
 
         $appointments = Appointment::where('doctor_id', $doctorId)
             ->whereDate('scheduled_at', $date->format('Y-m-d'))
