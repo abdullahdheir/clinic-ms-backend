@@ -46,21 +46,6 @@ class DepartmentResource extends Resource
                         ->label('الوصف')
                         ->columnSpanFull(),
                 ])->columns(2),
-
-                Section::make('العيادات')->schema([
-                    Forms\Components\CheckboxList::make('clinics')
-                        ->label('العيادات')
-                        ->relationship('clinics', 'name')
-                        ->columns(3),
-                ]),
-
-                Section::make('الأطباء')->schema([
-                    Forms\Components\CheckboxList::make('doctors')
-                        ->label('الأطباء')
-                        ->relationship('doctors', 'id')
-                        ->getOptionLabelFromRecordUsing(fn($record) => $record->user->name ?? $record->id)
-                        ->columns(3),
-                ]),
             ]);
     }
 
@@ -114,7 +99,8 @@ class DepartmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DoctorsRelationManager::class,
+            RelationManagers\ClinicsRelationManager::class,
         ];
     }
 

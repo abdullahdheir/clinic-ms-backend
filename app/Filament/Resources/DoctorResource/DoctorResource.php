@@ -53,69 +53,6 @@ class DoctorResource extends Resource
                         ->relationship('departments', 'name')
                         ->columns(3),
                 ]),
-
-                Section::make('العيادات')->schema([
-                    Forms\Components\Repeater::make('clinics')
-                        ->label('العيادات')
-                        ->relationship('clinics')
-                        ->schema([
-                            Forms\Components\Select::make('clinic_id')
-                                ->label('العيادة')
-                                ->options(\App\Models\Clinic::all(['id', 'name'])->pluck('name', 'id')->toArray())
-                                ->searchable()
-                                ->required()
-                                ->live(),
-                            Forms\Components\Select::make('department_id')
-                                ->label('القسم في العيادة')
-                                ->options(\App\Models\Department::all(['id', 'name'])->pluck('name', 'id')->toArray())
-                                ->searchable(),
-                            Forms\Components\TextInput::make('consultation_fee')
-                                ->label('رسوم الاستشارة')
-                                ->numeric()
-                                ->prefix('$')
-                                ->default(0),
-                            Forms\Components\TextInput::make('session_duration_minutes')
-                                ->label('مدة الجلسة (دقيقة)')
-                                ->numeric()
-                                ->default(30),
-                            Forms\Components\Toggle::make('is_active')
-                                ->label('نشط')
-                                ->default(true),
-                            Forms\Components\Repeater::make('shifts')
-                                ->label('ساعات العمل')
-                                ->schema([
-                                    Forms\Components\Select::make('day_of_week')
-                                        ->label('اليوم')
-                                        ->options([
-                                            'saturday' => 'السبت',
-                                            'sunday' => 'الأحد',
-                                            'monday' => 'الاثنين',
-                                            'tuesday' => 'الثلاثاء',
-                                            'wednesday' => 'الأربعاء',
-                                            'thursday' => 'الخميس',
-                                            'friday' => 'الجمعة',
-                                        ])
-                                        ->required()
-                                        ->searchable(),
-                                    Forms\Components\TimePicker::make('start_time')
-                                        ->label('وقت البداية')
-                                        ->seconds(false)
-                                        ->required(),
-                                    Forms\Components\TimePicker::make('end_time')
-                                        ->label('وقت النهاية')
-                                        ->seconds(false)
-                                        ->required(),
-                                    Forms\Components\Toggle::make('is_active')
-                                        ->label('نشط')
-                                        ->default(true),
-                                ])
-                                ->columns(4)
-                                ->columnSpanFull()
-                                ->itemLabel(fn(array $state): ?string => $state['day_of_week'] ?? null),
-                        ])
-                        ->columns(2)
-                        ->columnSpanFull(),
-                ]),
             ]);
     }
 
@@ -177,7 +114,8 @@ class DoctorResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ClinicsRelationManager::class,
+            RelationManagers\DepartmentsRelationManager::class,
         ];
     }
 
