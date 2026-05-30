@@ -61,15 +61,9 @@ class UserResource extends Resource
                 ])->columns(2),
 
                 Section::make('الصلاحيات')->schema([
-                    Forms\Components\Select::make('role')
+                    Forms\Components\Select::make('roles')
+                        ->relationship('roles','name')
                         ->label('الدور')
-                        ->options([
-                            'super_admin'  => 'مسؤول النظام',
-                            'manager'      => 'مدير عيادة',
-                            'doctor'       => 'طبيب',
-                            'receptionist' => 'موظف استقبال',
-                            'patient'      => 'مريض',
-                        ])
                         ->native(false)
                         ->required(),
                 ]),
@@ -90,10 +84,10 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->label('البريد')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role')
+                Tables\Columns\TextColumn::make('roles')
                     ->label('الدور')
                     ->badge()
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state->name) {
                         'super_admin'  => 'مسؤول النظام',
                         'manager'      => 'مدير عيادة',
                         'doctor'       => 'طبيب',
@@ -101,7 +95,7 @@ class UserResource extends Resource
                         'patient'      => 'مريض',
                         default        => $state,
                     })
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn($state) => match ($state->name) {
                         'super_admin'  => 'danger',
                         'manager'      => 'warning',
                         'doctor'       => 'success',

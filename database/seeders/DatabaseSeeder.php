@@ -7,7 +7,9 @@ use App\Models\Clinic;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\MedicalRecord;
+use App\Models\Patient;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,17 +17,14 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
-     * 
+     *
      * @return void
      */
     public function run(): void
     {
         // Create Roles
-        $roles = ['super_admin', 'manager', 'doctor', 'patient', 'receptionist'];
-        foreach ($roles as $roleName) {
-            Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-        }
-        
+        $this->call(RoleSeeder::class);
+
         // Create Super Admin User
         $superAdminRole = Role::firstOrCreate(['name' => 'super_admin']);
         $superAdmin = User::firstOrCreate(
@@ -63,6 +62,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
+
         $patientUser->assignRole('patient');
 
         // Create Clinic
@@ -76,32 +76,52 @@ class DatabaseSeeder extends Seeder
 
         // Create Departments
         $cardiology = Department::create([
-            'clinic_id' => $clinic->id,
             'name' => 'Cardiology',
             'specialty' => 'Heart Care',
             'max_capacity' => 15,
         ]);
 
         $pediatrics = Department::create([
-            'clinic_id' => $clinic->id,
             'name' => 'Pediatrics',
             'specialty' => 'Child Care',
             'max_capacity' => 20,
         ]);
 
+        DB::table('clinic_department')->insert([
+            [
+                'department_id' => $cardiology->id,
+                'clinic_id' => $clinic->id,
+                'is_primary' => true,
+            ],
+            [
+                'department_id' => $pediatrics->id,
+                'clinic_id' => $clinic->id,
+                'is_primary' => false,
+            ],
+        ]);
+
         // Create Doctor Profile
         $doctor = Doctor::create([
             'user_id' => $doctorUser->id,
-            'department_id' => $cardiology->id,
             'bio' => 'Specialist in cardiology with 10 years experience.',
             'specialization' => 'Cardiologist',
             'session_duration_minutes' => 30,
             'consultation_fee' => 100.00,
         ]);
 
+        DB::table('doctor_department')->insert([
+            [
+                'department_id' => $cardiology->id,
+                'doctor_id' => $doctor->id,
+                'is_primary' => true,
+            ],
+        ]);
+
+        $patient = Patient::create(['user_id' => $patientUser->id]);
+
         // Create Medical Record
         MedicalRecord::firstOrCreate(
-            ['patient_id' => $patientUser->id],
+            ['patient_id' => $patient->id],
             [
                 'blood_type' => 'O+',
                 'chronic_diseases' => ['Hypertension'],

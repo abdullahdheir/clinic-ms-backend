@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\DoctorNotes\Schemas;
 
 use App\Models\Doctor;
-use App\Models\User;
+use App\Models\Patient;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -20,7 +20,7 @@ class DoctorNoteForm
                     ->schema([
                         Select::make('patient_id')
                             ->label('المريض')
-                            ->options(User::where('role', 'patient')->pluck('name', 'id'))
+                            ->options(Patient::with('user')->get()->pluck('user.name', 'id'))
                             ->searchable()
                             ->required(),
                         Select::make('doctor_id')

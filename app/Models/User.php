@@ -16,7 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Override;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role', 'national_id', 'date_of_birth', 'gender', 'phone'])]
+#[Fillable(['name', 'email', 'password', 'national_id', 'date_of_birth', 'gender', 'phone'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -118,5 +118,10 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $panel->getId() === 'admin' ? $this->isSuperAdmin() : false;
+    }
+
+    public function getRoleAttribute(): string
+    {
+        return implode(', ', $this->roles()->pluck('name')->toArray());
     }
 }

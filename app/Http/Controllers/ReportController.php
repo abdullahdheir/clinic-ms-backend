@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Patient;
 use App\Models\User;
 use App\Models\Invoice;
 use App\Models\Visit;
@@ -32,10 +34,10 @@ class ReportController extends Controller
             ->count();
 
         // Total patients count
-        $totalPatients = User::where('role', 'patient')->count();
+        $totalPatients = Patient::count();
 
         // Active doctors count
-        $activeDoctors = User::where('role', 'doctor')->count();
+        $activeDoctors = Doctor::count();
 
         // Monthly revenue
         $monthlyRevenue = Invoice::where('status', 'paid')
@@ -52,9 +54,9 @@ class ReportController extends Controller
 
         // Appointments last 30 days
         $appointmentsLast30Days = Appointment::select(
-                DB::raw('DATE(appointment_time) as date'),
-                DB::raw('count(*) as count')
-            )
+            DB::raw('DATE(appointment_time) as date'),
+            DB::raw('count(*) as count')
+        )
             ->where('appointment_time', '>=', $thirtyDaysAgo)
             ->groupBy('date')
             ->orderBy('date')
@@ -69,10 +71,10 @@ class ReportController extends Controller
 
         // Top doctors by appointment count
         $topDoctors = Appointment::select(
-                'users.id',
-                'users.name as doctor',
-                DB::raw('count(appointments.id) as appointment_count')
-            )
+            'users.id',
+            'users.name as doctor',
+            DB::raw('count(appointments.id) as appointment_count')
+        )
             ->join('users', 'appointments.doctor_id', '=', 'users.id')
             ->where('appointments.appointment_time', '>=', $thirtyDaysAgo)
             ->groupBy('users.id', 'users.name')
@@ -211,7 +213,7 @@ class ReportController extends Controller
             'to' => 'nullable|date|after_or_equal:from',
         ]);
 
-        $query = User::where('role', 'patient')->with(['appointments', 'invoices']);
+        $query = Patient::with(['appointments', 'invoices']);
 
         // Apply date filters (for registration date)
         if ($request->from) {
@@ -251,14 +253,14 @@ class ReportController extends Controller
             'to' => 'nullable|date|after_or_equal:from',
         ]);
 
-        $query = User::where('role', 'doctor')->with(['appointments', 'visits']);
+        $query = Doctor::with(['appointments', 'visits']);
 
         $doctors = $query->orderBy('created_at', 'desc')->get();
 
         // Generate statistics for each doctor
         $doctorsWithStats = $doctors->map(function ($doctor) use ($request) {
             $appointmentsQuery = $doctor->appointments();
-            
+
             if ($request->from) {
                 $appointmentsQuery->whereDate('appointment_time', '>=', $request->from);
             }
@@ -270,8 +272,8 @@ class ReportController extends Controller
 
             return [
                 'id' => $doctor->id,
-                'name' => $doctor->name,
-                'email' => $doctor->email,
+                'name' => $doctor->user->name,
+                'email' => $$doctor->user->email,
                 'total_appointments' => $appointments->count(),
                 'completed_appointments' => $appointments->where('status', 'completed')->count(),
                 'cancelled_appointments' => $appointments->where('status', 'cancelled')->count(),

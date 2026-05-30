@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['super_admin', 'manager', 'doctor', 'receptionist', 'patient'])->default('patient')->after('email');
             $table->string('national_id')->nullable()->after('role');
             $table->date('date_of_birth')->nullable()->after('national_id');
             $table->enum('gender', ['male', 'female'])->nullable()->after('date_of_birth');
@@ -26,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'national_id', 'date_of_birth', 'gender', 'phone']);
+            $table->dropColumn(['national_id', 'date_of_birth', 'gender', 'phone']);
         });
     }
 };
