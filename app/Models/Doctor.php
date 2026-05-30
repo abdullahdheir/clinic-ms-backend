@@ -33,6 +33,13 @@ class Doctor extends Model
             ->withTimestamps();
     }
 
+    public function department()
+    {
+        return $this->belongsToMany(Department::class, 'doctor_department')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
+
     public function shifts(): HasMany
     {
         return $this->hasMany(DoctorShift::class);

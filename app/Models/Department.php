@@ -20,6 +20,13 @@ class Department extends Model
             ->withTimestamps();
     }
 
+    public function clinic()
+    {
+        return $this->belongsToMany(Clinic::class, 'clinic_department')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
+
     public function doctors(): BelongsToMany
     {
         return $this->belongsToMany(Doctor::class, 'doctor_department')
