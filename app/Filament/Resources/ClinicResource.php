@@ -79,7 +79,8 @@ class ClinicResource extends Resource
                 Section::make('الأطباء')->schema([
                     Forms\Components\CheckboxList::make('doctors')
                         ->label('الأطباء')
-                        ->relationship('doctors', 'user.name')
+                        ->relationship('doctors', 'id')
+                        ->getOptionLabelFromRecordUsing(fn($record) => $record->user->name ?? $record->id)
                         ->columns(3),
                 ]),
             ]);
