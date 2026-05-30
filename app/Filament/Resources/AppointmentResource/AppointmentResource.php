@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\AppointmentResource;
 
-use App\Filament\Resources\AppointmentResource\Pages;
 use App\Models\Appointment;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;

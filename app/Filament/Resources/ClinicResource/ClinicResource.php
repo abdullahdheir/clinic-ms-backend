@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ClinicResource;
 
-use App\Filament\Resources\ClinicResource\Pages;
 use App\Models\Clinic;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;

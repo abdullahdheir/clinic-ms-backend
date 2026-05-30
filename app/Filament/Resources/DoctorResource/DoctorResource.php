@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\DoctorResource;
 
-use App\Filament\Resources\DoctorResource\Pages;
 use App\Models\Doctor;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -116,6 +115,7 @@ class DoctorResource extends Resource
         return [
             RelationManagers\ClinicsRelationManager::class,
             RelationManagers\DepartmentsRelationManager::class,
+            RelationManagers\ShiftsRelationManager::class,
         ];
     }
 

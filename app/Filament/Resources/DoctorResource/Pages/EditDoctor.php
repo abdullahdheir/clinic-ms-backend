@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\DoctorResource\Pages;
 
-use App\Filament\Resources\DoctorResource;
+use App\Filament\Resources\DoctorResource\DoctorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

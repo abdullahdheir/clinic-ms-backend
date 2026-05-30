@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\DepartmentResource;
 
-use App\Filament\Resources\DepartmentResource\Pages;
 use App\Models\Department;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;

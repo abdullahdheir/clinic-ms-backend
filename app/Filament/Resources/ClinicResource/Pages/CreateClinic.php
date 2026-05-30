@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ClinicResource\Pages;
 
-use App\Filament\Resources\ClinicResource;
+use App\Filament\Resources\ClinicResource\ClinicResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
