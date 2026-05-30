@@ -16,7 +16,7 @@ class AuthController extends Controller
 
     /**
      * Register a new user and assign a role.
-     * 
+     *
      * @param Request $request The registration request.
      * @return JsonResponse User details and auth token.
      */
@@ -57,7 +57,7 @@ class AuthController extends Controller
 
     /**
      * Authenticate user and return token.
-     * 
+     *
      * @param Request $request The login request.
      * @return JsonResponse User details and auth token.
      * @throws ValidationException
@@ -81,12 +81,13 @@ class AuthController extends Controller
         return $this->successResponse([
             'user' => $user->load('roles', 'permissions'),
             'token' => $token,
+            'clinic_id' => $user->clinic_id,
         ], 'Logged in successfully');
     }
 
     /**
      * Logout user and revoke current token.
-     * 
+     *
      * @param Request $request The authenticated request.
      * @return JsonResponse Success message.
      */
@@ -98,30 +99,34 @@ class AuthController extends Controller
 
     /**
      * Get authenticated user details with roles and permissions.
-     * 
+     *
      * @param Request $request The authenticated request.
      * @return JsonResponse User data.
      */
     public function me(Request $request): JsonResponse
     {
-        return $this->successResponse($request->user()->load('roles', 'permissions'));
+        $user = $request->user()->load('roles', 'permissions');
+        return $this->successResponse([
+            'user' => $user,
+            'clinic_id' => $user->clinic_id,
+        ]);
     }
 
     /**
      * Update authenticated user profile.
-     * 
+     *
      * @param Request $request
      * @return JsonResponse User data.
      */
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'phone' => 'nullable|string|max:20',
             'national_id' => 'nullable|string|max:50',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
         ]);
 
         $user->update($request->only('name', 'phone', 'national_id', 'email'));
