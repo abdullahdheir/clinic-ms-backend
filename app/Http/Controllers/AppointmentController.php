@@ -19,7 +19,7 @@ class AppointmentController extends Controller
 
     /**
      * AppointmentController constructor.
-     * 
+     *
      * @param AppointmentRepository $repository The appointment repository instance.
      */
     public function __construct(
@@ -28,7 +28,7 @@ class AppointmentController extends Controller
 
     /**
      * Display a listing of the appointments.
-     * 
+     *
      * @return JsonResponse List of appointments with relations.
      */
     public function index(): JsonResponse
@@ -39,7 +39,7 @@ class AppointmentController extends Controller
 
     /**
      * Display today's appointments.
-     * 
+     *
      * @return JsonResponse List of today's appointments.
      */
     public function today(): JsonResponse
@@ -50,7 +50,7 @@ class AppointmentController extends Controller
 
     /**
      * Store a newly created appointment in storage.
-     * 
+     *
      * @param StoreAppointmentRequest $request The validated request containing appointment data.
      * @return JsonResponse The created appointment.
      */
@@ -62,7 +62,7 @@ class AppointmentController extends Controller
 
     /**
      * Display the specified appointment.
-     * 
+     *
      * @param int|string $id The appointment ID.
      * @return JsonResponse The appointment with relations.
      */
@@ -74,7 +74,7 @@ class AppointmentController extends Controller
 
     /**
      * Update the status of the specified appointment.
-     * 
+     *
      * @param UpdateAppointmentStatusRequest $request The validated request containing the new status.
      * @param int|string $id The appointment ID.
      * @return JsonResponse The updated appointment.
@@ -87,7 +87,7 @@ class AppointmentController extends Controller
 
     /**
      * Remove (cancel) the specified appointment from storage.
-     * 
+     *
      * @param int|string $id The appointment ID.
      * @return JsonResponse No content response on success.
      */
@@ -99,7 +99,7 @@ class AppointmentController extends Controller
 
     /**
      * Get available slots for a doctor on a specific date.
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -112,7 +112,7 @@ class AppointmentController extends Controller
 
         $doctorId = $request->doctor_id;
         $date = Carbon::parse($request->date);
-        
+
         $dayOfWeekInt = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
         $daysMap = [
             0 => 'sunday',
@@ -125,21 +125,33 @@ class AppointmentController extends Controller
         ];
         $dayOfWeek = $daysMap[$dayOfWeekInt];
 
-        $doctor = Doctor::findOrFail($doctorId);
-        
-        $shift = DoctorShift::where('doctor_id', $doctorId)
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_active', true)
-            ->first();
+        $doctor = Doctor::with('clinics')->findOrFail($doctorId);
 
-        if (!$shift) {
+        // Get working hours from doctor_clinic pivot table
+        $workingHours = null;
+        $sessionDuration = $doctor->session_duration_minutes ?? 30;
+        foreach ($doctor->clinics as $clinic) {
+            $pivot = $clinic->pivot;
+            if ($pivot->working_hours) {
+                $hours = json_decode($pivot->working_hours, true);
+                if (is_array($hours)) {
+                    foreach ($hours as $hour) {
+                        if (isset($hour['day']) && $hour['day'] === $dayOfWeek && isset($hour['is_active']) && $hour['is_active']) {
+                            $workingHours = $hour;
+                            $sessionDuration = $pivot->session_duration_minutes ?? $doctor->session_duration_minutes ?? 30;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$workingHours) {
             return $this->successResponse([]);
         }
 
-        $sessionDuration = $doctor->session_duration_minutes ?? 30;
-
-        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->start_time);
-        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $shift->end_time);
+        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $workingHours['start_time']);
+        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $workingHours['end_time']);
 
         $appointments = Appointment::where('doctor_id', $doctorId)
             ->whereDate('scheduled_at', $date->format('Y-m-d'))
@@ -153,9 +165,9 @@ class AppointmentController extends Controller
             $slotStart = $current->copy();
             $slotEnd = $current->copy()->addMinutes($sessionDuration);
 
-            $isBooked = $appointments->contains(function ($appointment) use ($slotStart, $slotEnd, $doctor) {
+            $isBooked = $appointments->contains(function ($appointment) use ($slotStart, $slotEnd, $sessionDuration) {
                 $aptStart = Carbon::parse($appointment->scheduled_at);
-                $aptEnd = $aptStart->copy()->addMinutes($doctor->session_duration_minutes ?? 30);
+                $aptEnd = $aptStart->copy()->addMinutes($sessionDuration);
                 return ($slotStart < $aptEnd && $slotEnd > $aptStart);
             });
 

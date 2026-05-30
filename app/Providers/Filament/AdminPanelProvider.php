@@ -45,7 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->font('Tajawal', provider: \Filament\FontProviders\GoogleFontProvider::class)
             ->darkMode(false)
-            ->sidebarCollapsibleOnDesktop(false)
+            ->sidebarCollapsibleOnDesktop()
             ->globalSearch(position: GlobalSearchPosition::Topbar)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->databaseNotifications()
